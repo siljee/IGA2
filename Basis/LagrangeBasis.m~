@@ -1,6 +1,6 @@
-function B = BernsteinBasis(p,x)
+function L = LagrangeBasis(p, t, x)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Constructs p+1 Bernstein polynomials.
+% Constructs p+1 Lagrange polynomials, defined by t
 %
 % Input:
 %    p        - The polynomial order of the p+1 basis functions.
@@ -13,10 +13,12 @@ function B = BernsteinBasis(p,x)
 %               defined on points x, one in each column.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-n = length(x);
-B = zeros(p+1,n);
+L = ones(p+1,length(x));
 
-for v = 0:p 
-    B(v+1,:) = nchoosek(p,v) .* x.^v .* (1-x).^(p-v);
-end
+for i = 1:p+1           % Bases
+    for j = 1:p+1       % Parameters
+        if j~= i
+            L(i,:) = L(i,:).*(x-t(j))/(t(i)-t(j));
+        end
+    end
 end

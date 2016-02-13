@@ -1,17 +1,19 @@
 function dB = BernsteinDerivative(p, x)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derivated Bernstein polynomials of order p and return p+1 derivated 
 % Bernstein polynomials of order p-1.
 %
 % Input:
-%    p        - The polynomial order of the original p+1 basis functions.
-%               (p = 0: constant, p=1: linear, p=2: quadratic etc.)
-%    x        - A vector of evaluation points in Bernstein parameter space.
+%    p        - The polynomial order of the original p+1 basis 
+%               functions. (p = 0: constant, p=1: linear, etc.)
+%    x        - A vector of evaluation points in Bernstein parameter 
+%               space.
 %
 % Output:
 %    dB       - Array of derivated Bernstein polynomials of order p-1. 
-%               One basis in each row, defined on points x, one in each column.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%               One basis in each row, defined on points x, one in 
+%               each column.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 n = length(x);
 dB = zeros(p+1,n);

@@ -1,74 +1,46 @@
 function dN = BsplineDerivative(p, k, knotVec, x)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Finds the kth-derivative of univariate B-spline basis of order p, defined
-% by knotVecor and evaluated over a set of points x.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Finds the kth-derivative of univariate B-spline basis of order p, 
+% defined by knotVecor and evaluated over a set of points x.
 %
 % Input:
 %    p        - The polynomial order.
 %    k        - Number of derivations.
 %    knotVec  - A vector of knots. i = 1,2,...,n+p+1. 
-%    x        - A vector of evaluation points B-spline parameter space.
+%    x        - A vector of evaluation points parameter space.
 %
 % Output:
-%    N_der    - Array of derivated Bernstein polynomials of order p-1. 
+%    dN       - Array of derivated B-spline basis functions of order p-k.
 %               One basis in each row, defined on points x, one in each column.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% This function find the kth-derivate of a univariate B-spline basis function of order p, 
-% defined by a knotvector and evaluated over a set of points x.
-%
-% Input
-%   p       Order
-%   k       times of derivating
-%   knotVector
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Preparations
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    N = BsplineBasisFunctions(knotVec, p-k,false, x);
-    size(N);
-    m = size(N,1)
-    x_n = length(x);            % Number of elements in the grid
+    N = BsplineBasis(knotVec, p-k, x);
+    m = size(N,1);      % Number of basis functions
+    x_n = length(x);    % Number of evaluation points
    
-
-    N_der = zeros(m,x_n);
-    
+    dN = zeros(m,x_n); 
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Derivation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   m-p+1
-   '----------------------------'
     
     for i = 1:m-k
         alpha = generate_alpha(k, knotVec, i, p);
         for j = 0: k
-           % fprintf('inside. i=%d, j=%d\n', i, j);
-            %disp(N(i+j,:))
-            N_der(i,:) = N_der(i,:) + alpha(k+1,j+1)*N(i+j,:);
+            dN(i,:) = dN(i,:) + alpha(k+1,j+1)*N(i+j,:);
         end
     end
         
-    
-    
-    factor = factorial(p) / factorial(p-k);
-    N_der = N_der * factor;
-   
-    N = BsplineBasisFunctions(knotVec, p, false, x);
+    dN = dN * (factorial(p) / factorial(p-k));
 end
 
 function alpha = generate_alpha(derivative, knotVector, i, p)
-derivative
-knotVector
-i
-p
-    
+% Generate alphas used in the derivation according to equation
+% \eqref{eq:BASISbsplineDerivative}
+
     alpha = zeros(derivative+1, derivative+1);
     alpha(1,1) = 1;
     
-    size(alpha);
     % When j = 1
     for k = (1 : derivative)
         denominator = knotVector(i+p-k+1) - knotVector(i);
@@ -88,7 +60,6 @@ p
             alpha(k+1,k+1) = -alpha(k, k) / denominator;
         end
     end
-    
     
     % When j = 1,...,k-1
     for j = (1 : derivative)
