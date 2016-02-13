@@ -1,5 +1,4 @@
 function N = BsplineBasis(knotVec, p, x)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constructs n univariate B-spline basis functions utilizing Cox-de Boor
 % recursion formula.
 %
@@ -8,15 +7,16 @@ function N = BsplineBasis(knotVec, p, x)
 %               be repeated.
 %    p        - The polynomial order of the n basis functions.
 %               (p = 0: constant, p=1: linear, p=2: quadratic etc.)
-%    x        - A vector of evaluation points in B-spline parameter space.
+%    x        - A vector of values in parameter space where the basis
+%               functions should be evaluated.
 %
 % Output:
-%    N        - Array of B-spline basis functions. One basis in each row,
-%               defined on points x, one in each column.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    N        - Array of B-spline basis functions. Each tow contain one
+%               basis function evaluated on x.
+%
 
-n = length(knotVec)-p-1;        % Number of bases
-N = zeros(n, length(x));        % Initialize basis array
+n = length(knotVec)-p-1;                    % Number of bases
+N = zeros(n, length(x));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initializing constant basis functions for p=0 
@@ -38,7 +38,6 @@ N = sparse(N);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for order = (1:p)
     for basis = (1: n)
-        
         N_1 = N(basis, :);
         if (basis == n)
             N_2 = 0;
@@ -54,12 +53,16 @@ for order = (1:p)
 end
 end
 
-% Make defined fraction based on the condition:  0/0 = 0.
+
 function fraction = definedFraction(num1, num2, den3, den4)
+% To make sure all fractions of Cox-de Boor formulae are defined the
+% assumption    0/0 = 0   must be explicitly implemented.
 
 denominator = den3 - den4;
 if (denominator == 0)
-    fraction = 0; return;
+    fraction = 0;
+    return;
 end
 fraction = (num1-num2)/denominator;
 end
+

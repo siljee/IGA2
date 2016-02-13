@@ -1,0 +1,77 @@
+function dN = BsplineDerivative(p, k, knotVec, x)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Finds the kth-derivative of univariate B-spline basis of order p, defined
+% by knotVecor and evaluated over a set of points x.
+%
+% Input:
+%    p        - The polynomial order.
+%    k        - Number of derivations.
+%    knotVec  - A vector of knots. i = 1,2,...,n+p+1. 
+%    x        - A vector of evaluation points B-spline parameter space.
+%
+% Output:
+%    dN       - Array of derivated B-spline basis functions of order p-k.
+%               One basis in each row, defined on points x, one in each column.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    N = BsplineBasis(knotVec, p-k, x);
+    m = size(N,1);      % Number of basis functions
+    x_n = length(x);    % Number of evaluation points
+   
+    dN = zeros(m,x_n); 
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Derivation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    for i = 1:m-k
+        alpha = generate_alpha(k, knotVec, i, p);
+        for j = 0: k
+            dN(i,:) = dN(i,:) + alpha(k+1,j+1)*N(i+j,:);
+        end
+    end
+        
+    dN = dN * (factorial(p) / factorial(p-k));
+end
+
+function alpha = generate_alpha(derivative, knotVector, i, p)
+% Generate alphas used in the derivation according to equation
+% \eqref{eq:BASISbsplineDerivative}
+
+    alpha = zeros(derivative+1, derivative+1);
+    alpha(1,1) = 1;
+    
+    % When j = 1
+    for k = (1 : derivative)
+        denominator = knotVector(i+p-k+1) - knotVector(i);
+        if denominator == 0
+            alpha(k+1,1) = 0;
+        else
+            alpha(k+1,1) = alpha(k, 1) / denominator;
+        end
+    end
+    
+    % When j == k
+    for k = (1 : derivative)
+        denominator = knotVector(i+p+1) - knotVector(i+k);
+        if denominator == 0
+            alpha(k+1,k+1) = 0;
+        else
+            alpha(k+1,k+1) = -alpha(k, k) / denominator;
+        end
+    end
+    
+    % When j = 1,...,k-1
+    for j = (1 : derivative)
+        for k = (j : derivative)
+            denominator = knotVector(i+p+j-k+1) - knotVector(i+j);
+            if denominator == 0
+                alpha(k+1,j+1) = 0;
+            else
+                alpha(k+1,j+1) = (alpha(k, j+1) - alpha(k,j)) / denominator;
+            end
+        end
+    end
+    
+end
+ 
