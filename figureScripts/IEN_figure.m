@@ -24,8 +24,8 @@ figure(1) % ID
 axis off
 hold on
 colors = get(gca, 'ColorOrder');
-plot(elementBndX,elementBndY,'r','Linewidth',3)
-plot(elementBndX',elementBndY','r','Linewidth',3)
+plot(elementBndX,elementBndY,'color',colors(2,:),'Linewidth',3)
+plot(elementBndX',elementBndY','color',colors(2,:),'Linewidth',3)
 
 plot(pointsX,pointsY,'o','MarkerEdgeColor', 'k','MarkerFaceColor', colors(1,:), 'MarkerSize',9)
 
@@ -57,8 +57,8 @@ figure(2) % IEN
 axis off
 hold on
 colors = get(gca, 'ColorOrder');
-plot(elementBndX,elementBndY,'r','Linewidth',3)
-plot(elementBndX',elementBndY','r','Linewidth',3)
+plot(elementBndX ,elementBndY ,'color',colors(2,:),'Linewidth',3)
+plot(elementBndX',elementBndY','color',colors(2,:),'Linewidth',3)
 
 plot(pointsX,pointsY,'o','MarkerEdgeColor', 'k','MarkerFaceColor', 'k', 'MarkerSize',9)
 
@@ -81,7 +81,7 @@ set(gca,'fontsize',16)
 
 picOff = 0.1;
 windowPos = [500 100 400 250];
-saveFigures = 1;
+saveFigures = 0;
 
 fig = figure(11); % IEN 1 elemet
 set(fig, 'Position', windowPos)
