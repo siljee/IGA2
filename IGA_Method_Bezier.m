@@ -1,4 +1,4 @@
-function U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f,  dirichletValues) %leftVal, rightVal)
+function U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f,  dirichletValues, ID, IEN, LM) %leftVal, rightVal)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       Initialisere viktige variabler
@@ -10,9 +10,9 @@ function U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_e
 C_xi  = BezierExtractionOperator(knotVec_xi ,p_xi);
 C_eta = BezierExtractionOperator(knotVec_eta,p_eta);
 
-IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
-ID  = generateID_left_right(np_xi, np_eta, -1, -2);
-LM  = ID(IEN);
+%IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
+%ID  = generateID_all4bnd(np_xi, np_eta, -1, -2,[],[]);
+%LM  = ID(IEN);
  
 dof = sum(ID>0);                      % Degrees of freedom
 Gp_xi = p_xi+1; Gp_eta = p_eta +1;    % Number of Gauss points
@@ -50,6 +50,7 @@ for i = 1:el_eta
         IEN_e = reshape(IEN(e,:),p_xi+1,p_eta+1);   % [IEN(e,:), IEN(e,:)+ncp];
         LM_e = LM(e,:);
         inner = LM_e(LM_e > 0);
+        dof = sum(ID>0); 
 
         
         [N, dNdxi, dNdeta, N_xi, N_eta] = shapeFunctions(p_xi, p_eta, G_xi_tilde, G_eta_tilde, Ce, C_xi(:,:,j), C_eta(:,:,i), A_xi, A_eta); % Px(IEN_e)); %, Py(IEN_e));
@@ -66,9 +67,9 @@ for i = 1:el_eta
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Stiffness matrix
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        gradPhi2g = dNdx(LM_e>0,:)*dNdx(LM_e>0,:)' + dNdy(LM_e>0,:)*dNdy(LM_e>0,:)'
+        %gradPhi2g = dNdx(LM_e>0,:)*dNdx(LM_e>0,:)' + dNdy(LM_e>0,:)*dNdy(LM_e>0,:)'
         for g = 1:Gp
-            gradPhi2g = dNdx(LM_e>0,g)*dNdx(LM_e>0,g)' + dNdy(LM_e>0,g)*dNdy(LM_e>0,g)'
+            gradPhi2g = dNdx(LM_e>0,g)*dNdx(LM_e>0,g)' + dNdy(LM_e>0,g)*dNdy(LM_e>0,g)';
             k = k + gradPhi2g*W(g)*Jparent*detJ(g);
         end
 
@@ -134,20 +135,6 @@ for i = 1:el_eta
                 end
                 l = l - dirichletValues(dVi)*sum(a(LM_e>0, nDbnd),2);
             end
-            %
-            %         % leftside
-            %         dVi = 2;
-            %         if ismember(-dVi, LM_e)% && leftVal ~= 0
-            %             nDbnd = find(LM_e == -dVi);
-            %             a = 0;
-            %
-            %             for g = 1:Gp
-            %                 gradPhi2g = dNdx(:,g)*dNdx(:,g)' + dNdy(:,g)*dNdy(:,g)';
-            %
-            %                 a = a + gradPhi2g*W(g)*Jparent*detJ(g);
-            %             end
-            %             l = l - dirichletValues(2)*sum(a(LM_e>0, nDbnd),2);
-            %         end
         end
         R(inner) = R(inner) + l;
         %disp('-------------------')
@@ -159,7 +146,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         U = K\R;
-        U = addDirichelBnd_leftRight(U, np_xi, np_eta, dirichletValues(1), dirichletValues(2));
+        U = addDirichelBnd(U, ID, dirichletValues);
 end
 
 

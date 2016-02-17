@@ -8,8 +8,8 @@ function [N, dNdxi, dNdeta,N_xi, N_eta]= shapeFunctions(p_xi, p_eta, G_xi, G_eta
 B_xi  = BernsteinBasis(p_xi,G_xi);              % (p+1) x Gpunkt
 B_eta = BernsteinBasis(p_eta,G_eta);            % (q+1) x Gpunkt
 
-dB_xi  = BernsteinDerivate(p_xi,G_xi);     
-dB_eta = BernsteinDerivate(p_eta,G_eta);       
+dB_xi  = BernsteinDerivative(p_xi,G_xi);     
+dB_eta = BernsteinDerivative(p_eta,G_eta);       
 
 
 % Bivariate

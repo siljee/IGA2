@@ -4,8 +4,13 @@ addpath HelpFunctions/; addpath Basis/; addpath Problems/;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Define problem variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-problem = 'x3';
+problem = 'x2';
 switch (problem)
+    case 'x'
+        U_exact = @(x,y) x;
+        dudx_exact = @(x,y) 1;
+        dudy_exact = @(x,y) zeros(size(x));
+        f = @(x,y) repmat(-2, size(x));
     case 'x2'
         U_exact = @(x,y) x.^2;
         dudx_exact = @(x,y) 2*x;
@@ -21,27 +26,28 @@ end
 startX = 0; endX = 1;
 startY = 0; endY = 1;
 
+% Constant Dirichlet values
 leftVal = U_exact(startX,0); rightVal = U_exact(endX,0); 
 dirichletValues = [ leftVal,  rightVal];
 
-isUniformKV = false;
+isUniformKV = true;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialize plot data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elementsStart = 2; elementsEnd = 9;
+elementsStart = 3; elementsEnd = 15;
 
 errorH0 = zeros(3, elementsEnd-elementsStart);
 errorH1 = zeros(3, elementsEnd-elementsStart);
 errorE = zeros(3, elementsEnd-elementsStart);
 h = zeros(3,elementsEnd-elementsStart);
 
-for p_xi = 1:3
+for p_xi = 2:2
     p_eta = p_xi;
     for el_xi = elementsStart:elementsEnd
         disp('------------------------------------')
-        el_eta = el_xi;
+        el_eta = 2; %el_xi;
         
         if (isUniformKV)
             knotVec_xi  = makeUniformKnotVector(p_xi, el_xi);
@@ -51,14 +57,22 @@ for p_xi = 1:3
             knotVec_eta = makeRandomNonUniformKnotVector(el_eta, p_eta, 1, true);
         end
         
+        greville_xi  = findGrevillePoints(knotVec_xi, p_xi);
+        greville_eta = findGrevillePoints(knotVec_eta, p_eta);
+        
         np_xi = length(knotVec_xi) - p_xi -1;                   % Number of control points in xi direction
         np_eta = length(knotVec_eta) - p_eta -1;                % Number of control points in eta direction
         
         h(p_xi, el_xi - elementsStart+1) = 1/el_xi;%max(findMaxStepSize(knotVec_xi), findMaxStepSize(knotVec_eta));
         
         IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
-        ID = generateID_left_right(np_xi, np_eta, -1,-2);
+        ID = generateID_all4bnd(np_xi, np_eta, -1,-2,-3:-1:-np_xi-2,[]);
         LM = ID(IEN);
+        
+        N_xi = BsplineBasis(knotVec_xi, p_xi, greville_xi);
+        N_eta = BsplineBasis(knotVec_eta, p_eta, greville_eta);
+        N = kron(N_eta,N_xi);
+        dirichletValues(3:3+np_xi-1) = U_exact(greville_xi,greville_eta)*N_xi;
         
         %%%%%% Make control points %%%%%%%%%%%%%
         Px = (findGrevillePoints(knotVec_xi, p_xi)-knotVec_xi(1))* (endX-startX)/(knotVec_xi(end)-knotVec_xi(1)) + startX; Px = repmat(Px',1,np_eta);
@@ -66,7 +80,7 @@ for p_xi = 1:3
         
         
         %%%%%% Evaluate on x and y grid %%%%%%%%
-        nx = 250; ny = 30;
+        nx = 5; ny = 4;
         xi =  linspace(knotVec_xi(1) ,knotVec_xi(end) ,nx);
         eta = linspace(knotVec_eta(1),knotVec_eta(end),ny);
         
@@ -80,7 +94,7 @@ for p_xi = 1:3
         N = kron(N_eta,N_xi);
         
         %%%%%%% The method %%%%%%
-        U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, dirichletValues);%  leftVal, rightVal);
+        U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, dirichletValues, ID, IEN, LM);%  leftVal, rightVal);
         Uw = U;
         U = N'*Uw;      % Interpolation
         
