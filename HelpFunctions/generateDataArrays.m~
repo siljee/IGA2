@@ -67,26 +67,21 @@ for i = 1:numel(bndNames)
                         dirID.(bndNames{i}) = -dirCount:-1:-np_eta-dirCount+1;
                         dirCount = dirCount + np_eta;
                         %DIR = [DIR; grevilleValues(:,1)];
-                        U_exact_left = @(y) u_exact(Px(1,:)',y);
-                        DIR = [DIR; splineInterpolation(U_exact_left, knotVec_eta, p_eta, Py(1,:)')];
+                        U_exact_left = @(y) U_exact(Px(1,:),y)
+                        DIR = [DIR; splineInterpolation(U_exact_left, knotVec_eta, p_eta, Py(1,:))];
                     case 'right'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_eta-dirCount+1;
                         dirCount = dirCount + np_eta;
-                        %DIR = [DIR; grevilleValues(:,end)];
-                        U_exact_right = @(y) u_exact(Px(end,:)',y);
-                        DIR = [DIR; splineInterpolation(U_exact_right, knotVec_eta, p_eta, Py(end,:)')];
+                        DIR = [DIR; grevilleValues(:,end)];
                     case 'buttom'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
                         dirCount = dirCount + np_xi;
                         %DIR = [DIR; grevilleValues(1,:)'];
-                        U_exact_buttom = @(x) u_exact(x,Py(:,1));
-                        DIR = [DIR; splineInterpolation(U_exact_buttom, knotVec_xi, p_xi, Px(:,1))];
+                        DIR = [DIR; grevilleValues(1,:)'];
                     case 'top'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
                         dirCount = dirCount + np_xi;
-                        %DIR = [DIR; grevilleValues(end,:)'];
-                        U_exact_top = @(x) u_exact(x,Py(:,end));
-                        DIR = [DIR; splineInterpolation(U_exact_top, knotVec_xi, p_xi, Px(:,end))];
+                        DIR = [DIR; grevilleValues(end,:)'];
                 end
             otherwise
                 error('Value of bnd with type d are wrongly specified! Use h, c or v')

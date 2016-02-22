@@ -7,7 +7,7 @@ addpath HelpFunctions/; addpath Basis/; addpath tests/
 % Welcome!
 %
 % Please specify your problem (choose a string from the list below):
-problem = 'sin(piy)';
+problem = 'x3';
 %
 % Specify your domain:
 domain.startX = 0; domain.endX = 1;
@@ -15,21 +15,21 @@ domain.startY = 0; domain.endY = 1;
 %
 % Now, to boundary conditions!
 % What type are your boundaries? ('d'-Dirichlet, 'n'-Neumann)
-bnd.left.type   = 'n';
-bnd.right.type  = 'n';
-bnd.buttom.type = 'd';
+bnd.left.type   = 'd';
+bnd.right.type  = 'd';
+bnd.buttom.type = 'n';
 bnd.top.type    = 'd';
 %
 % Are any of these homogeneous('h'), constant ('c') or variable('v')?
-bnd.left.value   = 'h';
-bnd.right.value  = 'h';
-bnd.buttom.value = 'h';
-bnd.top.value    = 'h';
+bnd.left.value   = 'v';
+bnd.right.value  = 'v';
+bnd.buttom.value = 'v';
+bnd.top.value    = 'v';
 %
 % Thanks, that's all! ^_^
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elementsStart = 3; elementsEnd = 12;
+elementsStart = 3; elementsEnd = 13;
 pStart = 1; pEnd = 3;
 
 % Problems to choose from:
