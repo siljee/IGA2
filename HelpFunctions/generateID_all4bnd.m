@@ -30,15 +30,13 @@ for i = 1:np_eta
         end
     else
         % All other values
-        if isscalar(leftDirichlet)
-            leftValue = leftDirichlet;
-        else
+        leftValue = leftDirichlet;
+        if length(leftDirichlet)>1
             leftValue = leftDirichlet(i);
         end
         
-        if isscalar(rightDirichlet)
-            rightValue = rightDirichlet;
-        else
+        rightValue = rightDirichlet;
+        if length(rightDirichlet)>1
             rightValue = rightDirichlet(i);
         end
         ID = [ID, leftValue,(i-1)*(np_xi-Dbnd)+1-start:i*(np_xi-Dbnd)-start,rightValue];

@@ -7,7 +7,7 @@ addpath HelpFunctions/; addpath Basis/; addpath tests/
 % Welcome!
 %
 % Please specify your problem (choose a string from the list below):
-problem = 'x3';
+problem = 'x2';
 %
 % Specify your domain:
 domain.startX = 0; domain.endX = 1;
@@ -24,15 +24,13 @@ bnd.buttom.type = 'n';
 %
 % Are any of these homogeneous('h'), constant ('c') or variable('v')?
 bnd.left.value   = 'h';
-bnd.right.value  = 'v';
+bnd.right.value  = 'c';
 bnd.top.value    = 'h';
 bnd.buttom.value = 'h';
 %
 % Thanks that's all! ^_^
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elementsStart = 3; elementsEnd = 3;
-pStart = 2; pEnd = 2;
 
 % Problems to choose from:
 switch (problem)
@@ -66,20 +64,19 @@ h_neu = {@(x,y)-dudx_exact(x,y), dudx_exact, @(x,y)-dudy_exact(x,y),dudy_exact};
 % dirichletValues = [ leftVal,  rightVal];
 
 isUniformKV = true;
-plotting = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialize plot data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+elementsStart = 3; elementsEnd = 10;
 
 errorH0 = zeros(3, elementsEnd-elementsStart);
 errorH1 = zeros(3, elementsEnd-elementsStart);
 errorE = zeros(3, elementsEnd-elementsStart);
 h = zeros(3,elementsEnd-elementsStart);
 
-for p_xi = pStart:pEnd
+for p_xi = 1:3
     p_eta = p_xi;
     for el_xi = elementsStart:elementsEnd
         disp('------------------------------------')
@@ -158,7 +155,7 @@ surf(xx, yy, U-U_exact(xx,yy))
 title(['Error.   p_\xi=', num2str(p_xi), ', p_\eta=', num2str(p_eta)])
 
 
-if plotting
+if 1
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       H^0 error

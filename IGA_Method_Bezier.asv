@@ -4,8 +4,15 @@ function U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_e
 %       Initialisere viktige variabler
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%np_xi  = length(knotVec_xi)  - p_xi  - 1;                % Number of control points in xi direction
+%np_eta = length(knotVec_eta) - p_eta - 1;                % Number of control points in eta direction
+
 C_xi  = BezierExtractionOperator(knotVec_xi ,p_xi);
 C_eta = BezierExtractionOperator(knotVec_eta,p_eta);
+
+%IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
+%ID  = generateID_all4bnd(np_xi, np_eta, -1, -2,[],[]);
+%LM  = ID(IEN);
  
 dof = sum(ID>0);                      % Degrees of freedom
 Gp_xi = p_xi+1; Gp_eta = p_eta +1;    % Number of Gauss points
