@@ -1,21 +1,25 @@
-function [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, u_exact, domain)
+function [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, u_exact, domain, Px, Py)
 
 DIR = [];
 
-U_exact 
 np_xi = length(knotVec_xi) - p_xi -1;                   % Number of control points in xi direction
 np_eta = length(knotVec_eta) - p_eta -1;                % Number of control points in eta direction
 
-greville_xi  = findGrevillePoints(knotVec_xi, p_xi);
+greville_xi  = findGrevillePoints(knotVec_xi, p_xi)
 greville_eta = findGrevillePoints(knotVec_eta, p_eta);
 
-greville_xi_mat  = repmat(greville_xi,length(greville_eta),1);
-greville_eta_mat = repmat(greville_eta',1,length(greville_xi));
+
+
 
 N_xi = BsplineBasis(knotVec_xi, p_xi, greville_xi);
 N_eta = BsplineBasis(knotVec_eta, p_eta, greville_eta);
+Px*N_xi
 
-grevilleValues = N_eta'*U_exact(greville_xi_mat,greville_eta_mat)*N_xi;
+
+greville_xi_mat  = repmat(P,length(greville_eta),1);
+greville_eta_mat = repmat(greville_eta',1,length(greville_xi));
+
+grevilleValues = N_eta'*u_exact(greville_xi_mat,greville_eta_mat)*N_xi;
 
 
 dirCount = 1;
@@ -31,7 +35,7 @@ dirCount = 1;
 % LM index multiple negative numbers.
 
 bndNames = fieldnames(bnd);
-for i = 1:numel(bndNames)ra
+for i = 1:numel(bndNames)
     % Dirichlet Boundary
     % Generate DIR and make vectors necessary for ID array.
     if bnd.(bndNames{i}).type == 'd'
@@ -41,7 +45,8 @@ for i = 1:numel(bndNames)ra
             case 'c'
                 dirID.(bndNames{i}) = -dirCount;
                 dirCount = dirCount + 1;
-                switch bndNames(i)
+                bndNames(i)
+                switch cell2mat(bndNames(i))
                     case 'left'
                         % independent on y
                         DIR = [DIR u_exact(domain.startX, domain.startY)];
@@ -57,7 +62,7 @@ for i = 1:numel(bndNames)ra
                 end
                 
             case 'v'
-                switch bndNames(i)
+                switch cell2mat(bndNames(i))
                     case 'left'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_eta-dirCount+1;
                         dirCount = dirCount + np_eta;
@@ -91,22 +96,26 @@ ID2 = reshape(ID,np_xi,np_eta)';
 NEU = [];
 % Neumann Boundary
 if bnd.left.type == 'n'
-    if bnd.left.value == 'c' || bnd.left.value == 'v';
+    value = bnd.left.value;
+    if value == 'c' || value == 'v';
         NEU = [NEU; ID2(ID2(:,1)>0,1), ones(sum(ID2(:,1)>0),1)];
     end
 end
 if bnd.right.type == 'n'
-    if bnd.left.value == 'c' || bnd.left.value == 'v';
-        NEU = [NEU; ID2(ID2(:,end)>0,end), ones(sum(ID2(:,end)>0),1)];
+    value = bnd.right.value;
+    if value == 'c' || value == 'v';
+        NEU = [NEU; ID2(ID2(:,end)>0,end), 2*ones(sum(ID2(:,end)>0),1)];
     end
 end
 if bnd.buttom.type == 'n'
-    if bnd.left.value == 'c' || bnd.left.value == 'v';
+    value = bnd.buttom.value;
+    if value == 'c' || value == 'v';
         NEU = [NEU; ID2(1,ID2(1,:)>0)', 3*ones(sum(ID2(1,:)>0),1)];
     end
 end
 if bnd.top.type == 'n'
-    if bnd.left.value == 'c' || bnd.left.value == 'v';
-        NEU = [NEU; ID2(end,ID2(end,:)>0)', 3*ones(sum(ID2(end,:)>0),1)];
+    value = bnd.top.value;
+    if value == 'c' || value == 'v';
+        NEU = [NEU; ID2(end,ID2(end,:)>0)', 4*ones(sum(ID2(end,:)>0),1)];
     end
 end

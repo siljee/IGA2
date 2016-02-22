@@ -12,8 +12,6 @@ C_eta = BezierExtractionOperator(knotVec_eta,p_eta);
 
 IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
 ID = generateID_left_right(np_xi, np_eta, -1, -2);
-size(ID)
-size(IEN)
 LM = ID(IEN);
 
 %gof = sum(ID>0);

@@ -1,4 +1,4 @@
-function [detJ, dNdx, dNdy] = Jacobian(dNdxi, dNdeta, Px, Py, Gp)
+function [detJ, dNdx, dNdy,J11] = Jacobian(dNdxi, dNdeta, Px, Py, Gp)
 
 dNdx = zeros(size(dNdxi));
 dNdx1 = zeros(size(dNdxi));

@@ -46,7 +46,7 @@ N_eta = C_eta*B_eta;
 A_xi = 1;
 A_eta = 1;
 %N_eta(:)'*Py(:,1)
-%N_xi(:)*Px(1,:)'
+%N_xi(:)*Px(1,:)' 
 dNdxi  = Ce*dBdxi/A_xi;
 dNdeta = Ce*dBdeta/A_eta;
 % dNdxi - kron(C_eta*B_eta,C_xi*dB_xi);

@@ -30,8 +30,8 @@ for i = 1:el_eta
         knot_j = elementStartKnots_xi(j);
         knot_i = elementStartKnots_eta(i);
        
-        A_xi = (knotVec_xi(knot_j+1)- knotVec_xi(knot_j));
-        A_eta = (knotVec_eta(knot_i+1)- knotVec_eta(knot_i));
+        A_xi = ((knotVec_xi(knot_j+1)- knotVec_xi(knot_j)));
+        A_eta = ((knotVec_eta(knot_i+1)- knotVec_eta(knot_i)));
         A = A_xi*A_eta;
         Jparent = A;
         %We = 1;
@@ -47,8 +47,7 @@ for i = 1:el_eta
 
         
         [N, dNdxi, dNdeta, N_xi, N_eta] = shapeFunctions(p_xi, p_eta, G_xi_tilde, G_eta_tilde, Ce, C_xi(:,:,j), C_eta(:,:,i), A_xi, A_eta); % Px(IEN_e)); %, Py(IEN_e));
-        [detJ, dNdx, dNdy] = Jacobian(dNdxi, dNdeta, Px(IEN_e(:)), Py(IEN_e(:)), Gp);
-        
+        [detJ, dNdx, dNdy, J11] = Jacobian(dNdxi, dNdeta, Px(IEN_e(:)), Py(IEN_e(:)), Gp);
         
         % PARAMETER SPACE
         %%%%%%%% Funksjonene er nå i parameter space. De er evaluert for
@@ -73,52 +72,94 @@ for i = 1:el_eta
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Load vector l
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %f = repmat((pi^2*sin(pi*G_xi))',Gp_eta,1); %,1)
-%         j
-%         A_xi
-%         A_xi*G_xi_tilde
-%         'gauss punkter i parameter: '
-%         A_xi*G_xi_tilde+knotVec_xi(p_xi+j)
-%         Px(IEN_e(:,:))'
-%         (A_xi*G_xi_tilde+knotVec_xi(p_xi+j))'*Px(IEN_e(:,:))'  % Gauss punkter i parameter space
-%         'c'
-% %         G_xi_tilde\C_xi(:,:,j)'
-% C_xi(:,:,j)'
-        %C_xi(:,:,j)'*Px(IEN_e(:,1))
-%         C_xi(:,:,j)= Px(IEN_e)
-        %knotVec_xi(p_xi+j)
-        %knotVec_xi(p_xi+j+1)
-        %Px(IEN_e(:,1))
-        % N'*Px    daah!    x_physical = 1*(repmat((G_xi_tilde*A_xi + knotVec_xi(p_xi+j)),Gp_eta,1))
-        %(G_xi_tilde*A_xi + knotVec_xi(p_xi+j)),Gp_eta,1)'*Px(IEN_e(:,:))
+
         
-        % Kanskje f heller skal evalueres i de (dobbelt)mappede gausspunktene!! 
-        % FEILLLLL  fx = N'*f(Px(IEN_e(:)), Py(IEN_e(:))) % Det kan være Py skal transponeres!
-        %Px
-        %Px(IEN_e)
-        %Px(IEN_e(:,1))
-%         N'*Px(IEN_e(:));
-%         N_xi'*Px(IEN_e(:,1));
-
-        fx = f(N_xi'*Px(IEN_e)*N_eta,N'*Py(IEN_e(:)));
-        %fx = f(x_physical,1) % Disse to er de samme
-
-        % Men jeg lurer på om denne N kanskje er evaluert i parameter
-        % space?
+        fx = f(N_xi'*Px(IEN_e)*N_eta,N'*Py(IEN_e(:)));  
         for g = 1:Gp
-            %N(LM_e>0,g)'* Px(LM_e>0,:)
             l = l + fx(g)*N(LM_e>0,g)*W(g)*Jparent*detJ(g);
         end
         
+        
+        % Neumann boundary
+        if ~isempty(NEU)
+            
+            
+        for neu = 1:length(NEU(:,1))
+            NEU(neu,1);
+            i_neuMat = find(LM_e(LM_e>0) == NEU(neu,1));
+            %i_neuBasis = find(LM_e == NEU(neu,1))   
+            if ~isempty(i_neuMat)
+                h = cell2mat(h_neu(NEU(neu,2)));
+                LM_e_square = reshape(LM_e,Gp_eta,Gp_xi)';
+                IEN_e_square = reshape(IEN_e,Gp_eta,Gp_xi)';
+                switch NEU(neu,2)
+                    case 1 % left boundary
+                        size(Px(1,1)*ones(1,Gp_eta))
+                        size(N_eta)
+                        size(Py(IEN_e))
+                        h = h(Px(1,1)*ones(1,Gp_eta),Py(IEN_e_square(:,1))'*N_eta)
+                        netaBasis = find(LM_e_square(:,1)== NEU(neu,1));
+                        integrand = N_eta(netaBasis,:)*(h'.*W_eta); 
+                    case 2 % right bondary
+                        h = h(Px(end,1)*ones(1,Gp_eta),Py(IEN_e_square(:,end))'*N_eta);
+                        netaBasis = find(LM_e_square(:,end)== NEU(neu,1));
+                        integrand = N_eta(netaBasis,:)*(h'.*W_eta);
+                    case 3 % buttom boundary
+                        sin(pi*Px(IEN_e_square(1,:))*N_xi)
+                        h = h(Px(IEN_e_square(1,:))*N_xi, Py(1,1)*ones(1,Gp_xi))
+                        nxiBasis = find(LM_e_square(1,:)== NEU(neu,1));
+                        integrand = N_xi(nxiBasis,:)*(h'.*W_xi);
+                    case 4 % top boundary
+                        h = h(Px(IEN_e_square(end,:))*N_xi, Py(1,end)*ones(1,Gp_xi));
+                        nxiBasis = find(LM_e_square(end,:)== NEU(neu,1));
+                        integrand = N_xi(nxiBasis,:)*(h'.*W_xi);
+                end
+                l(i_neuMat) = l(i_neuMat) + integrand*A_xi*J11(1);
+%                 
+%                 h_neu = {@(y)-dudx_exact(domain.startX*ones(1,np_eta),y), @(y) dudx_exact(domain.endX*ones(1,np_eta),y), ...
+%        %     @(x)-dudy_exact(x,domain.startY*ones(1,np_xi)), @(x) dudy_exact(x,domain.endY*ones(1,np_xi))};
+%                 'd'
+%                 W_xi
+%                 A_xi
+%                 J11
+%                 i_neuBasis
+%                 
+%                 LM_e1 = reshape(LM_e,Gp_eta,Gp_xi)'
+                %N_eta
+                %ID2 = reshape(ID,np_xi,np_eta)'
+%                 l(i_neuMat)
+%                 h*N_eta(:,:)*W_eta
+%                 
+%                 %netaBasis = find(ID2(:,end)==N EU(neu,1))
+%                 netaBasis = find(LM_e1(:,end)== NEU(neu,1))
+%                 
+%                 N_eta(netaBasis,:)
+%                 h.*W_eta
+
+%                 l(i_neuMat) = l(i_neuMat) + N_eta(netaBasis,:)*(h.*W_eta')'*A_xi*J11(1);
+%                 
+%                 
+%                 N_xi;
+%                 h = h(N_xi'*Px(IEN_e))
+%                 for g = 1:3%Gp
+%                     g;
+%                     h(g)
+%                     N(i_neu,g);
+%                     N_xi(:,g)
+%                     l(i_neu) = l(i_neu) + h(g)*N_eta(:,g)*W_xi(g)*A_xi*J11(g);
+%                 end
+                'SILJE! =D';
+            end
+        end
+        
+        
+        end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Nonhomo Dirichlet
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % rightside
         
-        % Ta en for her
         for dVi = 1:length(DIR)
-            %         dVi = 1;   % DirichletValueIndex
-            if ismember(-dVi, LM_e) %&& rightVal ~= 0
+            if ismember(-dVi, LM_e)
                 nDbnd = find(LM_e == -dVi);
                 a = 0;
                 

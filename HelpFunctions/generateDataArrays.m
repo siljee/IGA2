@@ -1,4 +1,4 @@
-function [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, u_exact, domain)
+function [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, u_exact, domain, Px, Py)
 
 DIR = [];
 
@@ -8,11 +8,15 @@ np_eta = length(knotVec_eta) - p_eta -1;                % Number of control poin
 greville_xi  = findGrevillePoints(knotVec_xi, p_xi);
 greville_eta = findGrevillePoints(knotVec_eta, p_eta);
 
-greville_xi_mat  = repmat(greville_xi,length(greville_eta),1);
-greville_eta_mat = repmat(greville_eta',1,length(greville_xi));
+
+
 
 N_xi = BsplineBasis(knotVec_xi, p_xi, greville_xi);
 N_eta = BsplineBasis(knotVec_eta, p_eta, greville_eta);
+
+
+greville_xi_mat  = repmat(Px(:,1)'*N_xi,length(greville_eta),1);
+greville_eta_mat = repmat(N_eta*Py(1,:)',1,length(greville_xi));
 
 grevilleValues = N_eta'*u_exact(greville_xi_mat,greville_eta_mat)*N_xi;
 
@@ -40,20 +44,19 @@ for i = 1:numel(bndNames)
             case 'c'
                 dirID.(bndNames{i}) = -dirCount;
                 dirCount = dirCount + 1;
-                bndNames(i)
                 switch cell2mat(bndNames(i))
                     case 'left'
                         % independent on y
-                        DIR = [DIR u_exact(domain.startX, domain.startY)];
+                        DIR = [DIR; u_exact(domain.startX, domain.startY)];
                     case 'right'
                         % independent on y
-                        DIR = [DIR u_exact(domain.endX, domain.startY)];
+                        DIR = [DIR; u_exact(domain.endX, domain.startY)];
                     case 'buttom'
                         % independent on x
-                        DIR = [DIR u_exact(domain.startX, domain.startY)];
+                        DIR = [DIR; u_exact(domain.startX, domain.startY)];
                     case 'top'
                         % independent on x
-                        DIR = [DIR u_exact(domain.startX, domain.endY)];      
+                        DIR = [DIR; u_exact(domain.startX, domain.endY)];      
                 end
                 
             case 'v'
@@ -61,19 +64,21 @@ for i = 1:numel(bndNames)
                     case 'left'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_eta-dirCount+1;
                         dirCount = dirCount + np_eta;
-                        DIR = [DIR grevilleValues(:,1)];
+                        DIR = [DIR; grevilleValues(:,1)];
                     case 'right'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_eta-dirCount+1;
                         dirCount = dirCount + np_eta;
-                        DIR = [DIR grevilleValues(:,end)];
+                        DIR = [DIR; grevilleValues(:,end)];
                     case 'buttom'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
                         dirCount = dirCount + np_xi;
-                        DIR = [DIR grevilleValues(1,:)];
+                        DIR
+                        grevilleValues(1,:)'
+                        DIR = [DIR; grevilleValues(1,:)'];
                     case 'top'
                         dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
                         dirCount = dirCount + np_xi;
-                        DIR = [DIR grevilleValues(end,:)];
+                        DIR = [DIR; grevilleValues(end,:)'];
                 end
             otherwise
                 error('Value of bnd with type d are wrongly specified! Use h, c or v')
@@ -99,7 +104,7 @@ end
 if bnd.right.type == 'n'
     value = bnd.right.value;
     if value == 'c' || value == 'v';
-        NEU = [NEU; ID2(ID2(:,end)>0,end), ones(sum(ID2(:,end)>0),1)];
+        NEU = [NEU; ID2(ID2(:,end)>0,end), 2*ones(sum(ID2(:,end)>0),1)];
     end
 end
 if bnd.buttom.type == 'n'
@@ -111,8 +116,6 @@ end
 if bnd.top.type == 'n'
     value = bnd.top.value;
     if value == 'c' || value == 'v';
-    'heihiehihiehihiehiheihihiehiehiehiehiheieheiehiheiehiheiheiheiehi' 
-        NEU = [NEU; ID2(end,ID2(end,:)>0)', 3*ones(sum(ID2(end,:)>0),1)];
+        NEU = [NEU; ID2(end,ID2(end,:)>0)', 4*ones(sum(ID2(end,:)>0),1)];
     end
 end
-NEU

@@ -7,66 +7,76 @@ addpath HelpFunctions/; addpath Basis/; addpath tests/
 % Welcome!
 %
 % Please specify your problem (choose a string from the list below):
-problem = 'x3';
+problem = 'sin(piy)';
 %
 % Specify your domain:
 domain.startX = 0; domain.endX = 1;
 domain.startY = 0; domain.endY = 1;
-startX = 0; endX = 1;
-startY = 0; endY = 1;
 %
 % Now, to boundary conditions!
 % What type are your boundaries? ('d'-Dirichlet, 'n'-Neumann)
-bnd.left.type   = 'd';
+bnd.left.type   = 'n';
 bnd.right.type  = 'n';
-bnd.top.type    = 'n';
-bnd.buttom.type = 'n';
+bnd.buttom.type = 'd';
+bnd.top.type    = 'd';
 %
 % Are any of these homogeneous('h'), constant ('c') or variable('v')?
 bnd.left.value   = 'h';
-bnd.right.value  = 'v';
-bnd.top.value    = 'h';
+bnd.right.value  = 'h';
 bnd.buttom.value = 'h';
+bnd.top.value    = 'h';
 %
-% Thanks that's all! ^_^
+% Thanks, that's all! ^_^
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elementsStart = 3; elementsEnd = 3;
-pStart = 2; pEnd = 2;
+elementsStart = 3; elementsEnd = 12;
+pStart = 1; pEnd = 3;
 
 % Problems to choose from:
 switch (problem)
     case 'x'
         U_exact = @(x,y) x;
-        dudx_exact = @(x,y) 1;
+        dudx_exact = @(x,y) ones(size(x));
         dudy_exact = @(x,y) zeros(size(x));
-        f = @(x,y) repmat(-2, size(x));
+        f = @(x,y) zeros(size(x));
     case 'x2'
         U_exact = @(x,y) x.^2;
         dudx_exact = @(x,y) 2*x;
-        dudy_exact = @(x,y) zeros(size(x));
+        dudy_exact = @(x,y) zeros(size(y));
         f = @(x,y) repmat(-2, size(x));
     case 'x3'
         U_exact = @(x,y) x.^3;
         dudx_exact = @(x,y) 3*x.^2;
-        dudy_exact = @(x,y) zeros(size(x));
+        dudy_exact = @(x,y) zeros(size(y));
         f = @(x,y) -6.*x;
+    case 'x4'
+        U_exact = @(x,y) x.^4;
+        dudx_exact = @(x,y) 4*x.^3;
+        dudy_exact = @(x,y) zeros(size(y));
+        f = @(x,y) -12.*x.^2;
     case 'sin(pix)'
         U_exact = @(x,y) sin(pi*x);
         dudx_exact = @(x,y) pi*cos(pi*x);
-        dudy_exact = @(x,y) zeros(size(x));
+        dudy_exact = @(x,y) zeros(size(y));
         f = @(x,y) pi^2*sin(pi*x);
+    case 'sin(piy)'
+        U_exact = @(x,y) sin(pi*y);
+        dudx_exact = @(x,y) zeros(size(x));
+        dudy_exact = @(x,y) pi*cos(pi*y);
+        f = @(x,y) pi^2*sin(pi*y);
 end
 
-% Works only for squared domains
-h_neu = {@(x,y)-dudx_exact(x,y), dudx_exact, @(x,y)-dudy_exact(x,y),dudy_exact};
+% Works only for squared domaain
+h_neu = {@(x,y)-dudx_exact(x,y), dudx_exact, ...
+         @(x,y)-dudy_exact(x,y), dudy_exact};
 
 % % Constant Dirichlet values
 % leftVal = U_exact(startX,0); rightVal = U_exact(endX,0); 
 % dirichletValues = [ leftVal,  rightVal];
 
 isUniformKV = true;
-plotting = false;
+isErrorPlot = 1;
+diff = 0.80;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialize plot data
@@ -83,7 +93,7 @@ for p_xi = pStart:pEnd
     p_eta = p_xi;
     for el_xi = elementsStart:elementsEnd
         disp('------------------------------------')
-        el_eta = 2; %el_xi;
+        el_eta = 3; %el_xi;
         
         if (isUniformKV)
             knotVec_xi  = makeUniformKnotVector(p_xi, el_xi);
@@ -93,39 +103,49 @@ for p_xi = pStart:pEnd
             knotVec_eta = makeRandomNonUniformKnotVector(el_eta, p_eta, 1, true);
         end
         
-        [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, U_exact, domain);
-   
+       
         np_xi  = length(knotVec_xi)  - p_xi  - 1;                  % Number of control points in xi direction
         np_eta = length(knotVec_eta) - p_eta - 1;                % Number of control points in eta direction
+        
+        % Works only for squared domains
+       % h_neu = {@(y)-dudx_exact(domain.startX*ones(1,np_eta),y), @(y) dudx_exact(domain.endX*ones(1,np_eta),y), ...
+       %     @(x)-dudy_exact(x,domain.startY*ones(1,np_xi)), @(x) dudy_exact(x,domain.endY*ones(1,np_xi))};
+        
+       
+       
        
         h(p_xi, el_xi - elementsStart+1) = 1/el_xi;%max(findMaxStepSize(knotVec_xi), findMaxStepSize(knotVec_eta));
 
         %%%%%% Make control points %%%%%%%%%%%%%
-        Px = (findGrevillePoints(knotVec_xi, p_xi)-knotVec_xi(1))* (endX-startX)/(knotVec_xi(end)-knotVec_xi(1)) + startX; Px = repmat(Px',1,np_eta);
-        Py = (findGrevillePoints(knotVec_eta, p_eta)-knotVec_eta(1))*(endY-startY)/(knotVec_eta(end)-knotVec_eta(1)) + startY; Py = repmat(Py,np_xi,1);
+        Px = (findGrevillePoints(knotVec_xi, p_xi)-knotVec_xi(1))* (domain.endX-domain.startX)/(knotVec_xi(end)-knotVec_xi(1)) + domain.startX; Px = repmat(Px',1,np_eta);
+        Py = (findGrevillePoints(knotVec_eta, p_eta)-knotVec_eta(1))*(domain.endY-domain.startY)/(knotVec_eta(end)-knotVec_eta(1)) + domain.startY; Py = repmat(Py,np_xi,1);
         
+        [ID, IEN, LM, DIR, NEU] = generateDataArrays(knotVec_xi, knotVec_eta, p_xi, p_eta, bnd, U_exact, domain, Px, Py);
+   
         %%%%%% Evaluate on x and y grid %%%%%%%%
         nx = 5; ny = 4;
         xi =  linspace(knotVec_xi(1) ,knotVec_xi(end) ,nx);
         eta = linspace(knotVec_eta(1),knotVec_eta(end),ny);
         
-        x = linspace(startX,endX,nx);
-        y = linspace(startY,endY,ny);
+        x = linspace(domain.startX,domain.endX,nx);
+        y = linspace(domain.startY,domain.endY,ny);
         xx = x'*ones(1,ny);
         yy = ones(nx,1)*y;
+        
         
         N_xi = BsplineBasis(knotVec_xi, p_xi, xi);
         N_eta = BsplineBasis(knotVec_eta, p_eta, eta);
         N = kron(N_eta,N_xi);
         
         %%%%%%% The method %%%%%%
+      
         U = IGA_Method_Bezier(knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, DIR, ID, IEN, LM, h_neu, NEU);%  leftVal, rightVal);
         Uw = U;
         U = N'*Uw;      % Interpolation
         
         Uw = reshape(Uw,np_xi,np_eta);
         U  = reshape(U,nx,ny);
-        
+  
         [errorH0(p_xi,el_xi-elementsStart+1), errorH1(p_xi,el_xi-elementsStart+1), errorE(p_xi,el_xi-elementsStart+1)] = evaluateU(Uw, U_exact, knotVec_xi, knotVec_eta, el_xi, el_eta, p_xi, p_eta, Px, Py, f, DIR, dudx_exact, dudy_exact);
         
         N_knot_xi = BsplineBasis(knotVec_xi,p_xi, knotVec_xi(1+p_xi:end-p_xi));
@@ -158,7 +178,7 @@ surf(xx, yy, U-U_exact(xx,yy))
 title(['Error.   p_\xi=', num2str(p_xi), ', p_\eta=', num2str(p_eta)])
 
 
-if plotting
+if isErrorPlot
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       H^0 error
@@ -168,7 +188,7 @@ if plotting
     hold on
     grid on
     
-    diff = 1/3;
+    
     %diff = 0.9;
     factor12 = (errorH0(1,:)/h(1,:).^(2))*diff;
     factor23 = (errorH0(2,:)/h(2,:).^(3))*diff;
