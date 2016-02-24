@@ -42,24 +42,36 @@ for i = 1:numel(bndNames)
     if bnd.(bndNames{i}).type == 'd'
         switch bnd.(bndNames{i}).value
             case 'h'
-                dirID.(bndNames{i}) = 0;
+                switch cell2mat(bndNames(i))
+                    case 'left'
+                        dirID.(bndNames{i}) = zeros(1,np_eta);
+                    case 'right'
+                        dirID.(bndNames{i}) = zeros(1,np_eta);
+                    case 'buttom'
+                        dirID.(bndNames{i}) = zeros(1,np_xi);
+                    case 'top'
+                        dirID.(bndNames{i}) = zeros(1,np_xi);
+                end
             case 'c'
-                dirID.(bndNames{i}) = -dirCount;
-                dirCount = dirCount + 1;
                 switch cell2mat(bndNames(i))
                     case 'left'
                         % independent on y
                         DIR = [DIR; u_exact(domain.startX, domain.startY)];
+                        dirID.(bndNames{i}) = -dirCount*ones(1,np_eta);
                     case 'right'
                         % independent on y
                         DIR = [DIR; u_exact(domain.endX, domain.startY)];
+                        dirID.(bndNames{i}) = -dirCount*ones(1,np_eta);
                     case 'buttom'
                         % independent on x
                         DIR = [DIR; u_exact(domain.startX, domain.startY)];
+                        dirID.(bndNames{i}) = -dirCount*ones(1,np_xi);
                     case 'top'
                         % independent on x
                         DIR = [DIR; u_exact(domain.startX, domain.endY)];      
+                        dirID.(bndNames{i}) = -dirCount*ones(1,np_xi);
                 end
+                dirCount = dirCount + 1;
                 
             case 'v'
                 switch cell2mat(bndNames(i))
@@ -76,7 +88,9 @@ for i = 1:numel(bndNames)
                         U_exact_right = @(y) u_exact(Px(end,:)',y);
                         DIR = [DIR; splineInterpolation(U_exact_right, knotVec_eta, p_eta, Py(end,:)')];
                     case 'buttom'
-                        dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
+                        %if any(NEU2 == 2)
+                            dirID.(bndNames{i}) = -dirCount:-1:-np_xi-dirCount+1;
+                        %end
                         dirCount = dirCount + np_xi;
                         %DIR = [DIR; grevilleValues(1,:)'];
                         U_exact_buttom = @(x) u_exact(x,Py(:,1));
@@ -96,7 +110,8 @@ for i = 1:numel(bndNames)
     end
 end
 
-ID = generateID_all4bnd(np_xi, np_eta, dirID.left ,dirID.right, dirID.buttom, dirID.top) ;
+ID = generateID_all4bnd(np_xi, np_eta, dirID.left ,dirID.right, dirID.buttom, dirID.top);
+
 IEN = generate_IEN(knotVec_xi, knotVec_eta, p_xi, p_eta);
 LM = ID(IEN);
 ID2 = reshape(ID,np_xi,np_eta)';
@@ -127,3 +142,4 @@ if bnd.top.type == 'n'
         NEU = [NEU; ID2(end,ID2(end,:)>0)', 4*ones(sum(ID2(end,:)>0),1)];
     end
 end
+
