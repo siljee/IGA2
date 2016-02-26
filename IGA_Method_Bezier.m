@@ -121,7 +121,7 @@ for i = 1:el_eta
                             nxiBasis = find(LM_e_square(1,:)== NEU(neu,1));
                             integrand = N_xi(nxiBasis,:)*(h'.*W_xi)*dxdxi(1)*A_xi;
                         case 4 % top boundary
-                            h = h(Px(IEN_e_square(end,:))*N_xi, Py(IEN_e_square(end,:))*N_eta)
+                            h = h(Px(IEN_e_square(end,:))*N_xi, Py(IEN_e_square(end,:))*N_eta);
                             nxiBasis = find(LM_e_square(end,:)== NEU(neu,1));
                             integrand = N_xi(nxiBasis,:)*(h'.*W_xi)*dxdxi(1)*A_xi;
                     end

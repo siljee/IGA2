@@ -7,23 +7,25 @@ addpath HelpFunctions/; addpath Basis/; addpath tests/
 % Welcome!
 %
 % Please specify your problem (choose a string from the list below):
-problem = 'y2';
+problem = 'x3+y2';
 %
 % Specify your initial domain:
 domain.startX = 0; domain.endX = 1;
 domain.startY = 0; domain.endY = 1;
 %
 % In what shape do you want to shape the domain?
-% shape = 'rect'     % 'rect'     : Rectangle.
-% shape = 'parall-x' % 'parall-x' : Parallelogram in x-direction.
-shape = 'parall-y' % 'parall-y' : Parallelogram in y-direction.
+% ('rect' - rectangle, 'parall-x' parallelogram in x-direction, 
+% 'parall-y' - parallelogram in y-direction.)
+% shape = 'rect';
+shape = 'parall-x';     % Only buttom and top can be neumann, for now.
+% shape = 'parall-y';     % Only left and right can be neumann, for now.
 
 %
 % Now, to boundary conditions!
 % What type are your boundaries? ('d'-Dirichlet, 'n'-Neumann)
 bnd.left.type   = 'd';
 bnd.right.type  = 'd';
-bnd.buttom.type = 'd';
+bnd.buttom.type = 'n';
 bnd.top.type    = 'n';
 %
 % Are any of these homogeneous('h'), constant ('c') or variable('v')?
@@ -35,10 +37,13 @@ bnd.top.value    = 'v';
 % Thanks, that's all! ^_^
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-elementsStart = 2; elementsEnd = 10;
+el_xi_start = 2; el_eta_start = 2;
+nohr = 4;  % number of h-refinement
+
+%elementsStart = 2; elementsEnd = 10;
 pStart = 1; pEnd = 3;
 
-isUniformKV = true;
+isUniformKV = false;
 isErrorPlot = 1;
 diff = 0.80;
 
@@ -130,58 +135,65 @@ h_neu = {@(x,y)-dudx_exact(x,y), dudx_exact, ...
 % Initialize plot data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%% Make control points %%%%%%%%%%%%%
 
 
-errorH0 = zeros(3, elementsEnd-elementsStart);
-errorH1 = zeros(3, elementsEnd-elementsStart);
-errorE = zeros(3, elementsEnd-elementsStart);
-h = zeros(3,elementsEnd-elementsStart);
+
+errorH0 = zeros(3, nohr);
+errorH1 = zeros(3, nohr);
+errorE = zeros(3, nohr);
+h = zeros(3,nohr);
 
 for p_xi = pStart:pEnd
     p_eta = p_xi;
-    for el_xi = elementsStart:elementsEnd
+    
+    if (isUniformKV)
+        knotVec_xi  = makeUniformKnotVector(p_xi, el_xi_start);
+        knotVec_eta = makeUniformKnotVector(p_eta,el_eta_start);
+    else
+        knotVec_xi  = makeRandomNonUniformKnotVector(el_xi_start , p_xi , 1, true);
+        knotVec_eta = makeRandomNonUniformKnotVector(el_eta_start, p_eta, 1, true);
+    end
+    
+    np_xi  = length(knotVec_xi)  - p_xi  - 1;                 % Number of control points in xi direction
+    np_eta = length(knotVec_eta) - p_eta - 1;                 % Number of control points in eta direction
+    
+    Px = (findGrevillePoints(knotVec_xi, p_xi)-knotVec_xi(1))* (domain.endX-domain.startX)/(knotVec_xi(end)-knotVec_xi(1)) + domain.startX; Px = repmat(Px',1,np_eta);
+    Py = (findGrevillePoints(knotVec_eta, p_eta)-knotVec_eta(1))*(domain.endY-domain.startY)/(knotVec_eta(end)-knotVec_eta(1)) + domain.startY; Py = repmat(Py,np_xi,1);
+    
+    switch shape
+        case 'parall-x'
+            Px = Px+Py;
+        case 'parall-y'
+            Py = Px+Py;
+            
+            n_y = Px(end,1) - Px(1,1);
+            n_x = Py(1,end) - Py(end,end);
+            
+            h_neu{3} = @(x,y) -(dudx_exact(x,y)*n_x + dudy_exact(x,y)*n_y);
+            h_neu{4} = @(x,y)   dudx_exact(x,y)*n_x + dudy_exact(x,y)*n_y;
+            
+            
+    end
+    %Px(1,1) = -1
+    el_xi_start
+    for hr = 1:nohr     %h-refinement
         disp('------------------------------------')
-        el_eta = el_xi; %el_xi;
+        %el_eta = el_xi; %el_xi;
         
-        if (isUniformKV)
-            knotVec_xi  = makeUniformKnotVector(p_xi, el_xi);
-            knotVec_eta = makeUniformKnotVector(p_eta,el_eta);
-        else
-            knotVec_xi  = makeRandomNonUniformKnotVector(el_xi , p_xi , 1, true);
-            knotVec_eta = makeRandomNonUniformKnotVector(el_eta, p_eta, 1, true);
-        end
+        [knotVec_xi, knotVec_eta, Px, Py] = h_refinement(knotVec_xi, knotVec_eta ,p_xi, p_eta, Px, Py);
+
+        el_xi = countElements(knotVec_xi);
+        el_eta = countElements(knotVec_eta);
         
+        np_xi  = length(knotVec_xi)  - p_xi  - 1;                 % Number of control points in xi direction
+        np_eta = length(knotVec_eta) - p_eta - 1;                 % Number of control points in eta direction
         
-        np_xi  = length(knotVec_xi)  - p_xi  - 1;                  % Number of control points in xi direction
-        np_eta = length(knotVec_eta) - p_eta - 1;                % Number of control points in eta direction
+        el_xi
         
-        % Works only for squared domains
-        % h_neu = {@(y)-dudx_exact(domain.startX*ones(1,np_eta),y), @(y) dudx_exact(domain.endX*ones(1,np_eta),y), ...
-        %     @(x)-dudy_exact(x,domain.startY*ones(1,np_xi)), @(x) dudy_exact(x,domain.endY*ones(1,np_xi))};
+        h(p_xi, hr) = 1/el_xi;%max(findMaxStepSize(knotVec_xi), findMaxStepSize(knotVec_eta));
         
-        
-        
-        
-        h(p_xi, el_xi - elementsStart+1) = 1/el_xi;%max(findMaxStepSize(knotVec_xi), findMaxStepSize(knotVec_eta));
-        
-        %%%%%% Make control points %%%%%%%%%%%%%
-        Px = (findGrevillePoints(knotVec_xi, p_xi)-knotVec_xi(1))* (domain.endX-domain.startX)/(knotVec_xi(end)-knotVec_xi(1)) + domain.startX; Px = repmat(Px',1,np_eta);
-        Py = (findGrevillePoints(knotVec_eta, p_eta)-knotVec_eta(1))*(domain.endY-domain.startY)/(knotVec_eta(end)-knotVec_eta(1)) + domain.startY; Py = repmat(Py,np_xi,1);
-        
-        switch shape
-            case 'parall-x'
-                Px = Px+Py;
-            case 'parall-y'
-                Py = Px+Py;
-                
-                n_y = Px(end,1) - Px(1,1);
-                n_x = Py(1,end) - Py(end,end);
-                
-                h_neu{3} = @(x,y) -(dudx_exact(x,y)*n_x + dudy_exact(x,y)*n_y);
-                h_neu{4} = @(x,y)   dudx_exact(x,y)*n_x + dudy_exact(x,y)*n_y;
-                
-                
-        end
+
         
         
                 
@@ -214,7 +226,7 @@ for p_xi = pStart:pEnd
         
         
         
-        [errorH0(p_xi,el_xi-elementsStart+1), errorE(p_xi,el_xi-elementsStart+1), uInt] = evaluateU(Uw, U_exact, knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, DIR, ID, IEN, LM, h_neu, NEU, dudx_exact, dudy_exact, domain);
+        [errorH0(p_xi,hr), errorE(p_xi,hr), uInt] = evaluateU(Uw, U_exact, knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, DIR, ID, IEN, LM, h_neu, NEU, dudx_exact, dudy_exact, domain);
         U_ny = @(x,y) (U_exact(x,y)).^2;
         %         uInt_exact = dblquad(U_ny,domain.startX,domain.endX,domain.startY, domain.endY)
         %         uInt
