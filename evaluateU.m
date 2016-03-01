@@ -17,10 +17,19 @@ C_eta = BezierExtractionOperator(knotVec_eta,p_eta);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Gp_xi = p_xi + 1; Gp_eta = p_eta + 1;    % Number of Gauss points
 Gp = Gp_xi * Gp_eta;
-% [G_xi,W_xi] = lgwt(Gp_xi,0,1);
-% [G_eta,W_eta] = lgwt(Gp_eta,0,1);
-[G_xi,W_xi] = GaussQuadrature(Gp_xi);
-[G_eta,W_eta] = GaussQuadrature(Gp_eta);
+
+if Gp_xi <= 3
+    [G_xi ,W_xi] = GaussQuadrature(Gp_xi);
+else
+    [G_xi ,W_xi] = lgwt(Gp_xi,0,1);
+end
+if Gp_eta <= 3
+    [G_eta ,W_eta] = GaussQuadrature(Gp_eta);
+else
+    [G_eta ,W_eta] = lgwt(Gp_eta,0,1);
+end
+%[G_xi,W_xi] = GaussQuadrature(Gp_xi);
+%[G_eta,W_eta] = GaussQuadrature(Gp_eta);
 
 W = kron(W_eta,W_xi);
 %U = zeros(size(Uw));

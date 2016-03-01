@@ -24,13 +24,13 @@ figure(1) % ID
 axis off
 hold on
 colors = get(gca, 'ColorOrder');
-<<<<<<< HEAD
-plot(elementBndX,elementBndY,'k','Linewidth',3)
-plot(elementBndX',elementBndY','k','Linewidth',3)
-=======
+% <<<<<<< HEAD
+% plot(elementBndX,elementBndY,'k','Linewidth',3)
+% plot(elementBndX',elementBndY','k','Linewidth',3)
+% =======
 plot(elementBndX,elementBndY,'color',colors(2,:),'Linewidth',3)
 plot(elementBndX',elementBndY','color',colors(2,:),'Linewidth',3)
->>>>>>> 2e08aeb7c56cc84de5fd300eedaedfa4910cb0bb
+% >>>>>>> 2e08aeb7c56cc84de5fd300eedaedfa4910cb0bb
 
 plot(pointsX,pointsY,'o','MarkerEdgeColor', 'k','MarkerFaceColor', colors(1,:), 'MarkerSize',9)
 

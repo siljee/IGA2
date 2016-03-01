@@ -15,8 +15,17 @@ Gp = Gp_xi * Gp_eta;
 K = sparse(dof, dof);
 R = sparse(dof,1);
 
-[G_xi_tilde ,W_xi] = GaussQuadrature(Gp_xi);
-[G_eta_tilde ,W_eta] = GaussQuadrature(Gp_eta);
+if Gp_xi <= 3
+    [G_xi_tilde ,W_xi] = GaussQuadrature(Gp_xi);
+else
+    [G_xi_tilde ,W_xi] = lgwt(Gp_xi,0,1);
+end
+if Gp_eta <= 3
+    [G_eta_tilde ,W_eta] = GaussQuadrature(Gp_eta);
+else
+    [G_eta_tilde ,W_eta] = lgwt(Gp_eta,0,1);
+end
+
 % [G_xi_tilde ,W_xi] = lgwt(Gp_xi,0,1);
 % [G_eta_tilde ,W_eta] = lgwt(Gp_eta,0,1);
 W = kron(W_eta,W_xi);

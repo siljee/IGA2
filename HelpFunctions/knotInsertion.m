@@ -17,7 +17,7 @@ m = length(newKnots_dir);                    % Number of new knots
 
 
 for j = 1:m                                     % index of inserted knot
-    k = find(knotVec_dir < newKnots_dir(j),1,'last');   % index of knot left of inserted knot
+    k = find(knotVec_dir <= newKnots_dir(j),1,'last');   % index of knot left of inserted knot
    
     % Generate alphas
     alpha = zeros(n+j-1,1);
