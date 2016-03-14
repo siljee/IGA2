@@ -1,4 +1,4 @@
-function [errorH0, errorE, Uintegral] = evaluateU(Uw, U_exact, knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, DIR, ID, IEN, LM, h_neu, NEU, dudx_exact, dudy_exact, domain)%  leftVal, rightVal);)
+function [errorH0, errorE, Uintegral] = evaluateU(Uw, U_exact, knotVec_xi, knotVec_eta, p_xi, p_eta, el_xi, el_eta, np_xi, np_eta, Px, Py, f, DIR, ID, IEN, LM, h_neu, NEU, dudx_exact, dudy_exact, domain, Gp_xi, Gp_eta)%  leftVal, rightVal);)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       Initialisere viktige variabler
@@ -14,32 +14,19 @@ C_eta = BezierExtractionOperator(knotVec_eta,p_eta);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Det kan være en feil når p ~= q
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Gp_xi = p_xi + 1; Gp_eta = p_eta + 1;    % Number of Gauss points
-Gp = Gp_xi * Gp_eta;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Gp_xi = p_xi + 1; Gp_eta = p_eta + 1;    % Number of Gauss points
+% Gp = Gp_xi * Gp_eta;
+[B_xi, B_eta, dB_xi, dB_eta, W, W_xi, W_eta] = bernsteinBasisAndDerivative(p_xi, p_eta, Gp_xi, Gp_eta)
 
-if Gp_xi <= 3
-    [G_xi ,W_xi] = GaussQuadrature(Gp_xi);
-else
-    [G_xi ,W_xi] = lgwt(Gp_xi,0,1);
-end
-if Gp_eta <= 3
-    [G_eta ,W_eta] = GaussQuadrature(Gp_eta);
-else
-    [G_eta ,W_eta] = lgwt(Gp_eta,0,1);
-end
-%[G_xi,W_xi] = GaussQuadrature(Gp_xi);
-%[G_eta,W_eta] = GaussQuadrature(Gp_eta);
-
-W = kron(W_eta,W_xi);
 %U = zeros(size(Uw));
 errorH0 = 0;
 errorH1 = 0;
 errorE = 0;
 Uintegral = 0;
-
-elementStartKnots_xi = findElements(knotVec_xi);
-elementStartKnots_eta = findElements(knotVec_eta);
+% 
+% elementStartKnots_xi = findElements(knotVec_xi);
+% elementStartKnots_eta = findElements(knotVec_eta);
 
 % Ax = domain.startX;
 % Bx = domain.endX;
@@ -53,12 +40,9 @@ for i = 1:el_eta
     for j = 1:el_xi
         e = (i-1)*el_xi +j;
         
-
-        
-        
-        
-        knot_j = elementStartKnots_xi(j);
-        knot_i = elementStartKnots_eta(i);
+%         
+%         knot_j = elementStartKnots_xi(j);
+%         knot_i = elementStartKnots_eta(i);
         
 %         Ax_e = (j-1)*lx;
 %         Bx_e = j*lx;
@@ -66,23 +50,34 @@ for i = 1:el_eta
 %         Ay_e = (i-1)*ly;
 %         By_e = (i)*ly;
         
-        Ce = kron(C_eta(:,:,i),C_xi(:,:,j));        % (p+1)*(q+1) x (p+1)*(q+1)
-      
-        IEN_e = IEN(e,:);
-        LM_e = LM(e,:);
+       % Ce = kron(C_eta(:,:,i),C_xi(:,:,j));        % (p+1)*(q+1) x (p+1)*(q+1)
+     
+          
         
-        Px_e = Px(IEN_e(:));
-        Py_e = Py(IEN_e(:));
+        LM_e = LM(e,:); IEN_e = IEN(e,:);
+        inner = LM_e(LM_e > 0);      
+        Px_e = Px(IEN_e(:)); Py_e = Py(IEN_e(:));
         
-        A_xi = (knotVec_xi(knot_j+1)- knotVec_xi(knot_j));
-        A_eta = (knotVec_eta(knot_i+1)- knotVec_eta(knot_i));
-        A = A_xi*A_eta;
-        J_delta = A;
+%         IEN_e = IEN(e,:);
+%         LM_e = LM(e,:);
+%         
+%         Px_e = Px(IEN_e(:));
+%         Py_e = Py(IEN_e(:));
         
-        [N, dNdxi, dNdeta,N_xi,N_eta] = shapeFunctions(p_xi, p_eta, G_xi, G_eta, Ce, C_xi(:,:,j), C_eta(:,:,i), A_xi, A_eta); 
-        [detJ, dNdx, dNdy] = Jacobian(dNdxi, dNdeta, Px_e, Py_e, Gp);
-        
-        detJ;   
+
+        [Jpar, Jpar_xi, Jpar_eta] = findParentJacobian(knotVec_xi, knotVec_eta, j, i);
+        [N, dNdxi, dNdeta, N_xi, N_eta] = shapeFunctions(B_xi, B_eta, dB_xi, dB_eta, C_xi(:,:,j), C_eta(:,:,i), Jpar_xi, Jpar_eta); 
+        [detJ, dNdx, dNdy, dxdxi, dydeta] = Jacobian(dNdxi, dNdeta, Px_e, Py_e, Gp_xi*Gp_eta);
+%         
+%         A_xi = (knotVec_xi(knot_j+1)- knotVec_xi(knot_j));
+%         A_eta = (knotVec_eta(knot_i+1)- knotVec_eta(knot_i));
+%         A = A_xi*A_eta;
+%         J_delta = A;
+%         
+%         [N, dNdxi, dNdeta,N_xi,N_eta] = shapeFunctions(p_xi, p_eta, G_xi, G_eta, Ce, C_xi(:,:,j), C_eta(:,:,i), A_xi, A_eta); 
+%         [detJ, dNdx, dNdy] = Jacobian(dNdxi, dNdeta, Px_e, Py_e, Gp);
+%         
+%         detJ;   
 
         % N er evaluert i gausspunkter.
        % disp('----------------- YO! ----------------')
@@ -110,16 +105,15 @@ for i = 1:el_eta
         
         
         
-        
         duhdx = dNdx'*Uw(IEN_e);
         duhdy = dNdy'*Uw(IEN_e);
         du_uhdx = dudx-duhdx;
         du_uhdy = dudy-duhdy;
         
 %         H0 = 0;
-%         uInt = 0;
+%         uInt = 0;e 
 %         J_delta = 1;
-        for g = 1:Gp
+        for g = 1:Gp_xi*Gp_eta
             u_uh = abs(u(g)-uh(g))^2;
             u_uhdx = (dudx(g) - duhdx(g))^2;
             u_uhdy = (dudy(g) - duhdy(g))^2;
@@ -130,14 +124,14 @@ for i = 1:el_eta
 %             J_delta;
             
             detJ(g);
-            J_delta;
+            Jpar;
             
-            H0 = H0 + u_uh * W(g) * abs(detJ(g))*abs(J_delta) ;
+            H0 = H0 + u_uh * W(g) * abs(detJ(g))*abs(Jpar) ;
             %H1 = H1 + (u_uh + u_uhdx + u_uhdy)*W(g)*detJ(g)*J_delta;
           
             gradPhi2g = du_uhdx(g)*du_uhdx(g)' + du_uhdy(g)*du_uhdy(g)';
             %u_uhdx+u_uhdy -gradPhi2g;
-            e = e + (u_uhdx + u_uhdy)*W(g)*abs(J_delta)*abs(detJ(g));
+            e = e + (u_uhdx + u_uhdy)*W(g)*abs(Jpar)*abs(detJ(g));
             
             
             %uInt = uInt + u(g) * W(g) * detJ(g)*J_delta ;

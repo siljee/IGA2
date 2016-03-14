@@ -1,14 +1,13 @@
 close all; clear all;
 addpath HelpFunctions/; addpath Basis/; addpath tests/
 
-tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Proble specification - Start here!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Welcome!
 %
 % Please specify your problem (choose a string from the list below):
-problem = 'x3';
+problem = 'x2';
 %
 % Specify your initial domain:
 domain.startX = 0; domain.endX = 1;
@@ -19,21 +18,21 @@ domain.startY = 0; domain.endY = 1;
 % 'parall-x' parallelogram in x-direction,
 % 'parall-y' - parallelogram in y-direction,
 % 'plateHole' - square plate with a hole)
-% 'L-shape'
+% 'L-shape' 
 %
-shape = 'rect';
+% shape = 'rect';
 % shape = 'rect-8';
 % shape = 'parall-x';     % Only buttom and top can be neumann, for now.
 % shape = 'parall-y';     % Only left and right can be neumann, for now.
 % shape = 'plateHole';
-shape = 'L-shape';
+% shape = 'L-shape';
 % shape = 'L-shape2';
-% shape = 'curve';
+shape = 'curve';
 
 %
 % Now, to boundary conditions!
 % What type are your boundaries? ('d'-Dirichlet, 'n'-Neumann)
-bnd.left.type   = 'n';
+bnd.left.type   = 'd';
 bnd.right.type  = 'd';
 bnd.buttom.type = 'd';
 bnd.top.type    = 'd';
@@ -47,12 +46,12 @@ bnd.top.value    = 'v';
 % Thanks, that's all! ^_^
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-el_xi_start = 3; el_eta_start = 2;
-nohr = 7;  % number of h-refinement
+el_xi_start = 2; el_eta_start = 2;
+nohr = 5;  % number of h-refinement
 
 %elementsStart = 2; elementsEnd = 10;
 p_xi_start = 1; p_eta_start = 1;
-nopr = 3; % number of p-refinement
+nopr = 1; % number of p-refinement
 
 isUniformKV = true;
 isErrorPlot = 1;
@@ -204,33 +203,23 @@ switch shape
         knotVec_xi  = makeUniformKnotVector(p_xi_start,2);
         knotVec_eta = makeUniformKnotVector(p_eta_start,1);
     case 'L-shape'
-        p_xi_mesh1 = 2; p_eta_mesh1 = 2;
-        nopr = 1;
-        knotVec_xi_mesh1 = [0 0 0 0.5 0.5 1 1 1];
-        knotVec_eta_mesh1= [0 0 0 1 1 1];
-%         Px_mesh1 = [1,1,1; 0,0,0.5; -1,-0.5,0; -1,-0.55, 0; -1,-0.6,0];
-%         Py_mesh1 = [-1,-0.6,0; -1, -0.55,0; -1,-0.5,0; 0,0,0.5; 1,1,1];
-        Px_mesh1 = [1,1,1; 0,0.25,0.5; -1,-0.5,0; -1,-0.5, 0; -1,-0.5,0];
-        Py_mesh1 = [-1,-0.5,0; -1, -0.5,0; -1,-0.5,0; 0,0.25,0.5; 1,1,1];
-        
-        %el_xi_start = countElements(knotVec_xi); el_eta_start = countElements(knotVec_eta);
-        
-        [h_mesh1, errorE_mesh1, errorH0_mesh1 ~] = errorEstimates(p_xi_mesh1, p_eta_mesh1, knotVec_xi_mesh1, knotVec_eta_mesh1, Px_mesh1, Py_mesh1, U_exact, f, dudx_exact, dudy_exact, bnd, domain, h_neu, nohr, nopr, shape);
-        
-        
-        p_xi_start = 2; p_eta_start = 2;
-        nopr = 1;
-        knotVec_xi = [0 0 0 0.5 1 1 1];
-        knotVec_eta= [0 0 0 1 1 1];
-%         Px = [1,1,1; -1,0,0; -1,-0.7,0; -1,-0.65, 0];
-%         Py = [-1,-0.65,0; -1, -0.7,0; -1,0,0; 1,1,1];
-%         Px = [1,1,1; -1, 0,0; -1,-0.5,0; -1,-0.5, 0];
-%         Py = [-1,-0.5,0; -1, -0.5,0; -1, 0,0; 1,1,1];
-        Px = [1,1,1; -1,0.25,0; -1,-0.65,0; -1,-0.5, 0];
-        Py = [-1,-0.5,0; -1, -0.65,0; -1,0.25,0; 1,1,1];
-       
-        el_xi_start = countElements(knotVec_xi); el_eta_start = countElements(knotVec_eta);
-        
+         p_xi = 2; p_eta = 2;
+         nopr = 1;
+         knotVec_xi = [0 0 0 0.5 0.5 1 1 1];
+         knotVec_eta= [0 0 0 1 1 1];
+         Px = [1,1,1; 0,0,0.5; -1,-0.5,0; -1,-0.55, 0; -1,-0.6,0];
+         Py = [-1,-0.6,0; -1, -0.55,0; -1,-0.5,0; 0,0,0.5; 1,1,1];
+         el_xi_start = countElements(knotVec_xi); el_eta_start = countElements(knotVec_eta);
+         
+    case 'L-shape2'
+         p_xi_start = 2; p_eta_start = 2;
+         nopr = 1;
+         knotVec_xi = [0 0 0 0.5 1 1 1];
+         knotVec_eta= [0 0 0 1 1 1];
+         Px = [1,1,1; -1,0,0; -1,-0.7,0; -1,-0.65, 0];
+         Py = [-1,-0.65,0; -1, -0.7,0; -1,0,0; 1,1,1];
+         el_xi_start = countElements(knotVec_xi); el_eta_start = countElements(knotVec_eta);
+    
     case 'curve'
         p_xi_start = 2; p_eta_start = 2;
         knotVec_xi = [0,0,0,0.5,1,1,1];
@@ -238,7 +227,7 @@ switch shape
         Px = [0,-1,-2; 0,-1,-2; 1,1,1;3,3,3];
         Py = [0,0,0;1,2,2;1.5,4,5;1.5,4,5];
         nopr = 1;
-        nohr = 7;
+        nohr = 2;
         
     case 'rect-8'
         p_xi_start = 1; p_eta_start = 1;
@@ -246,20 +235,20 @@ switch shape
         
 end
 
-[h, errorE, errorH0, U, p_xi_last, p_eta_last, knotVec_xi_last, knotVec_eta_last, Px_last, Py_last] = errorEstimates(p_xi_start, p_eta_start, knotVec_xi, knotVec_eta, Px, Py, U_exact, f, dudx_exact, dudy_exact, bnd, domain, h_neu, nohr, nopr, shape);
-%
+[h, errorE, errorH0, U] = errorEstimates(p_xi_start, p_eta_start, knotVec_xi, knotVec_eta, Px, Py, U_exact, f, dudx_exact, dudy_exact, bnd, domain, h_neu, nohr, nopr)
+% 
 % nx = 2; ny = 8;
 % xi =  linspace(knotVec_xi(1) ,knotVec_xi(end) ,nx);
 % eta = linspace(knotVec_eta(1),knotVec_eta(end),ny);
-%
+% 
 % %x = linspace(domain.startX,domain.endX,nx);
 % %y = linspace(domain.startY,domain.endY,ny);
-%
-%
+% 
+% 
 % N_xi = BsplineBasis(knotVec_xi, p_xi, xi);
 % N_eta = BsplineBasis(knotVec_eta, p_eta, eta);
 % N = kron(N_eta,N_xi);
-%
+% 
 % xx = reshape(N'*Px(:),nx,ny);
 % yy = reshape(N'*Py(:),nx,ny);
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -272,7 +261,7 @@ end
 % hold on
 % %plot((N_knot_xi'*Px)', 'k-*')
 % %plot((N_knot_eta'*Py')','k-*')
-%
+% 
 % subplot(3,1,2)
 % surf(xx, yy,U)
 % title(['Approximate.   p_\xi=', num2str(p_xi), ', p_\eta=', num2str(p_eta)])
@@ -280,11 +269,11 @@ end
 % plot3(Px,Py,Uw,'*')
 % xlabel('x')
 % ylabel('y')
-%
+% 
 % subplot(3,1,3)
 % surf(xx, yy, U-U_exact(xx,yy))
 % title(['Error.   p_\xi=', num2str(p_xi), ', p_\eta=', num2str(p_eta)])
-%
+% 
 
 p_xi = p_xi_start;
 p_eta = p_eta_start;
@@ -306,7 +295,7 @@ elements_eta = [knotVec_eta(elements_eta), knotVec_eta(end)];
 N_xi_k = BsplineBasis(knotVec_xi, p_xi, elements_xi);
 N_eta_k = BsplineBasis(knotVec_eta, p_eta, elements_eta);
 
-figure(88)
+figure(88) 
 colors = get(gca, 'ColorOrder');
 
 Cx = N_xi'*Px*N_eta;
@@ -315,11 +304,11 @@ hold on
 surf(Cx,Cy, zeros(size(Cx)), 'linestyle', 'none', 'FaceColor', colors(1,:), 'FaceAlpha',0.5 )
 plot(Px,Py,'k')
 plot(Px',Py','k')
-Cx_k = (N_xi_k'*Px*N_eta_k);
-Cy_k = (N_xi_k'*Py*N_eta_k);
+Cx_k = (N_xi_k'*Px*N_eta_k)
+Cy_k = (N_xi_k'*Py*N_eta_k)
 
 
-plot(Cx_k ,Cy_k , 'color', colors(1,:), 'linewidth',3)
+% plot(Cx_k ,Cy_k , 'color', colors(1,:), 'linewidth',3)
 plot(Cx_k',Cy_k', 'color', colors(1,:), 'linewidth',3)
 plot(Px,Py,'o','MarkerEdgeColor', 'none','MarkerFaceColor', 'k', 'MarkerSize', 10)
 plot(N_xi_k'*Px*N_eta_k,N_xi_k'*Py*N_eta_k, 'o','MarkerEdgeColor', 'none','MarkerFaceColor', colors(1,:), 'MarkerSize', 6)
@@ -328,95 +317,6 @@ set(gca,'fontsize', 18);
 
 axis([min(min(Px)),max(max(Px)),min(min(Py)),max(max(Py))])
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%  mesh 1 %%%%%%%%%%%%%%%%%%
-if strcmp(shape,'L-shape')
-    nx = 100; ny = 100;
-    xi =  linspace(knotVec_xi_mesh1(1) ,knotVec_xi_mesh1(end) ,nx);
-    eta = linspace(knotVec_eta_mesh1(1),knotVec_eta_mesh1(end),ny);
-    
-    N_xi = BsplineBasis(knotVec_xi_mesh1, p_xi_mesh1, xi);
-    N_eta = BsplineBasis(knotVec_eta_mesh1, p_eta_mesh1, eta);
-    
-    
-    elements_xi = findElements(knotVec_xi_mesh1);
-    elements_eta = findElements(knotVec_eta_mesh1);
-    
-    elements_xi = [knotVec_xi_mesh1(elements_xi), knotVec_xi_mesh1(end)];
-    elements_eta = [knotVec_eta_mesh1(elements_eta), knotVec_eta_mesh1(end)];
-    
-    N_xi_k = BsplineBasis(knotVec_xi_mesh1, p_xi_mesh1, elements_xi);
-    N_eta_k = BsplineBasis(knotVec_eta_mesh1, p_eta_mesh1, elements_eta);
-    
-    figure(87)
-    colors = get(gca, 'ColorOrder');
-    
-    Cx = N_xi'*Px_mesh1*N_eta;
-    Cy = N_xi'*Py_mesh1*N_eta;
-    hold on
-    surf(Cx,Cy, zeros(size(Cx)), 'linestyle', 'none', 'FaceColor', colors(1,:), 'FaceAlpha',0.5 )
-    plot(Px_mesh1,Py_mesh1,'k')
-    plot(Px_mesh1',Py_mesh1','k')
-    Cx_k = (N_xi_k'*Px_mesh1*N_eta_k);
-    Cy_k = (N_xi_k'*Py_mesh1*N_eta_k);
-    
-    
-    plot(Cx_k ,Cy_k , 'color', colors(1,:), 'linewidth',3)
-    plot(Cx_k',Cy_k', 'color', colors(1,:), 'linewidth',3)
-    plot(Px_mesh1,Py_mesh1,'o','MarkerEdgeColor', 'none','MarkerFaceColor', 'k', 'MarkerSize', 10)
-    plot(N_xi_k'*Px_mesh1*N_eta_k,N_xi_k'*Py_mesh1*N_eta_k, 'o','MarkerEdgeColor', 'none','MarkerFaceColor', colors(1,:), 'MarkerSize', 6)
-    set(gca,'fontsize', 18);
-    
-    
-    axis([min(min(Px_mesh1)),max(max(Px_mesh1)),min(min(Py_mesh1)),max(max(Py_mesh1))])
-end
-
-%%%%%% plot last mesh %%%%%%%%%%%%%%
-
-nx = 100; ny = 100;
-xi =  linspace(knotVec_xi_last(1) ,knotVec_xi_last(end) ,nx);
-eta = linspace(knotVec_eta_last(1),knotVec_eta_last(end),ny);
-
-N_xi = BsplineBasis(knotVec_xi_last, p_xi_last, xi);
-N_eta = BsplineBasis(knotVec_eta_last, p_eta_last, eta);
-
-
-elements_xi = findElements(knotVec_xi_last);
-elements_eta = findElements(knotVec_eta_last);
-
-elements_xi = [knotVec_xi_last(elements_xi), knotVec_xi_last(end)];
-elements_eta = [knotVec_eta_last(elements_eta), knotVec_eta_last(end)];
-
-N_xi_k = BsplineBasis(knotVec_xi_last, p_xi_last, elements_xi);
-N_eta_k = BsplineBasis(knotVec_eta_last, p_eta_last, elements_eta);
-
-figure(89)
-colors = get(gca, 'ColorOrder');
-
-Cx = N_xi'*Px_last*N_eta;
-Cy = N_xi'*Py_last*N_eta;
-hold on
-surf(Cx,Cy, zeros(size(Cx)), 'linestyle', 'none', 'FaceColor', colors(1,:), 'FaceAlpha',0.5 )
-%plot(Px_last,Py_last,'k')
-%plot(Px_last',Py_last','k')
-Cx_k = (N_xi_k'*Px_last*N_eta_k);
-Cy_k = (N_xi_k'*Py_last*N_eta_k);
-
-
-plot(Cx_k ,Cy_k , 'color', colors(1,:), 'linewidth',1)
-plot(Cx_k',Cy_k', 'color', colors(1,:), 'linewidth',1)
-%plot(Px_last,Py_last,'o','MarkerEdgeColor', 'none','MarkerFaceColor', 'k', 'MarkerSize', 10)
-plot(N_xi_k'*Px_last*N_eta_k,N_xi_k'*Py_last*N_eta_k, 'o','MarkerEdgeColor', 'none','MarkerFaceColor', colors(1,:), 'MarkerSize', 3)
-set(gca,'fontsize', 18);
-
-
-axis([min(min(Px_last)),max(max(Px_last)),min(min(Py_last)),max(max(Py_last))])
-
-
-
-
-
-
 if isErrorPlot
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -424,30 +324,27 @@ if isErrorPlot
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(4)
     
-    diff = 0.3;
-    loglog(h',errorH0','-','linewidth',3)% 'color', colors(2,:))
+    loglog(h(2,:)',errorH0(2,:)','-','linewidth',3, 'color', colors(2,:))
     hold on
     grid on
     
     set(gca, 'ColorOrderIndex', 1)
     set(gca,'fontsize', 16);
-    colors = get(gca, 'ColorOrder');
     
     leg = legend('u_h, p=1','u_h, p=2', 'u_h, p=3', 'C_1h^2 (reference)', 'C_2h^3 (reference)', 'C_3h^4 (reference)'); % 'u=C_3x³')
     set(leg,'FontSize',11);
     xlabel('h', 'FontWeight','bold')
     ylabel('||u-u_h||_{H^0}', 'FontWeight','bold')
-    factor = zeros(1,p_xi);
+    factor = zeros(1,p_xi)
     legendString = cell(1, p_xi);
-    for hi = p_xi:p_xi+nopr-1
+    for hi = 2:p_xi
         set(gca, 'ColorOrderIndex', hi)
         factor(hi) = (errorH0(hi,:)/h(hi,:).^(hi+1))*diff;
         loglog(h(hi,:)', factor(hi)*h(hi,:)'.^(hi+1), '--')
         legendString{hi} = ['u_h, p=', num2str(hi)];
-        t = text(h(hi,end)/2,factor(hi)*h(hi,end)'.^(hi+1),['h^', num2str(hi+1)]);
+        t = text(h(hi,end)/1.5,factor(hi)*h(hi,end)'.^(hi+1),['h^', num2str(hi+1)]);
         t.FontSize = 14;
-        t.Color = colors(mod(hi-1,p_xi+nopr-1)+1,:);
-        
+        t.Color = colors(mod(hi-1,p_xi)+1,:);
         
     end
     %legendString{p_xi} = ['u_h, p=', num2str(p_xi)];
@@ -456,6 +353,14 @@ if isErrorPlot
     %t = text(h(end,end)/1.5,errorH0(end,end)/14', 'Machine error');
     %t.FontSize = 14;
     %t.Color = colors(mod(p_xi-1,p_xi)+1,:);
+
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -468,61 +373,75 @@ if isErrorPlot
         colors = get(gca, 'ColorOrder');
         loglog(h(2,:)',errorH0(2,:)','linewidth',3,'color',colors(2,:))
         hold on
-        loglog(h_mesh1(2,:)',errorH0_mesh1(2,:)','linewidth',3,'color',colors(1,:))
         fig = gca;
         grid on
-        
         factor22 = (errorH0(2,:)/h(2,:).^(2))*diff;
-        factor23 = (errorH0(2,2:end)/h(2,2:end).^(3))*diff;
-        factor12 = (errorH0_mesh1(2,:)/h_mesh1(2,:).^(2))*diff;
-        factor13 = (errorH0_mesh1(2,:)/h_mesh1(2,:).^(3))*diff;
+        factor23 = (errorH0(2,:)/h(2,:).^(3))*diff;
         set(fig, 'ColorOrderIndex', 1)
-
-        loglog(h_mesh1(2,:)',factor13*(h_mesh1(2,:)'.^(3)),'--', 'color',colors(1,:))
-        t = text(h_mesh1(2,end)/2,factor13*h_mesh1(2,end)'.^(3),['h^', num2str(2+1)]);
-        t.FontSize = 16;
-        t.Color = colors(1,:);
-
-        loglog(h(2,:)',factor23*(h(2,:)'.^(3)),'--', 'color',colors(2,:))
-        t = text(h(2,end)/2,factor23*h(2,end)'.^(3),['h^', num2str(2+1)]);
-        t.FontSize = 16;
-        t.Color = colors(2,:);
-
-
-        legend('Mesh 1', 'Mesh 2') %, 'C_1h^3 (reference)', 'C_2h^2 (reference)');
-        %set(leg,'FontSize',11);
+        loglog(h(2,:)',factor22*(h(2,:)'.^(2)),'--')
+        loglog(h(2,:)',factor23*(h(2,:)'.^(3)),'--')
+        leg = legend('u_h, p=2', 'C_1h^2 (reference)', 'C_2h^3 (reference)');
+        set(leg,'FontSize',11);
         set(gca,'fontsize', 18);
         xlabel('h', 'FontWeight','bold')
         ylabel('||u-u_h||_{H^0}', 'FontWeight','bold')
     end
     
+
+    % title('H^0,   u = x^3')
+    % ylabel('H^0 error norm:  ||u-u_h||_{H^0}')
+    
+    %
+    %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %     %       H^1 error
+    %     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %     figure(5)
+    %     loglog(h',errorH1','linewidth',2)
+    %     hold on
+    %     grid on
+    %
+    %     factor11 = errorH1(1,:)*diff/h(1,:).^(1);
+    %     factor22 = errorH1(2,:)*diff/h(2,:).^(2);
+    %     factor33 = errorH1(3,:)*diff/h(3,:).^(3);
+    %
+    %     fig = gca;
+    %     set(fig, 'ColorOrderIndex', 1)
+    %     set(gca,'fontsize', 14);
+    %     loglog(h(1,:)',factor11*(h(1,:)'.^(1)),'--')
+    %     loglog(h(2,:)',factor22*(h(2,:)'.^(2)),'--')
+    %     loglog(h(3,:)',factor33*(h(3,:)'.^(3)),'--')
+    %
+    %     legend('u_h, p=1','u_h, p=2', 'u_h, p=3', 'C_1h  (reference)', 'C_2h^2 (reference)',  'C_3h^3 (reference)')
+    %     % title('H^1,   u = x^3')
+    %     xlabel('h', 'FontWeight','bold')
+    %     ylabel('||u-u_h||_{H^1}', 'FontWeight','bold')
+    %     % ylabel('H^1 error norm:   ||u-u_h||_{H^1}')
+    %
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       Energy error
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     figure(6)
-    diff = 0.5;
     
-    %loglog(h(:,2:end)',errorE(:,2:end)','linewidth',3);% 'color', colors(2,:))
-    loglog(h',errorE','linewidth',3);% 'color', colors(2,:))
+    loglog(h(2,:)',errorE(2,:)','linewidth',3, 'color', colors(2,:))
     hold on
     grid on
     
     set(gca,'fontsize', 16);
     set(gca, 'ColorOrderIndex', 1)
-    colors = get(gca, 'ColorOrder');
     
     factor = zeros(1,p_xi);
     legendString = cell(1,p_xi);
-    for hi = p_xi:p_xi+nopr-1
+    for hi = 2:p_xi
         set(gca, 'ColorOrderIndex', hi)
         if  sum(errorE(hi,:)) ~=0
             factor(hi) = errorE(hi,:)*diff/h(hi,:).^(hi);
             loglog(h(hi,:)',factor(hi)*(h(hi,:)'.^(hi)),'--')
             legendString{hi} = ['u_h, p=', num2str(hi)];
             
-            t = text(h(hi,end)/2,factor(hi)*(h(hi,end)'.^(hi)),['h^', num2str(hi),'     ']);
+            t = text(h(hi,end)/1.5,factor(hi)*(h(hi,end)'.^(hi)),['h^', num2str(hi),'     ']);
             t.FontSize = 14;
-            t.Color = colors(mod(hi-1,p_xi+nopr-1)+1,:);
+            t.Color = colors(mod(hi-1,p_xi)+1,:);
         end
     end
     %legendString{p_xi} = ['u_h, p=', num2str(p_xi)];
@@ -532,41 +451,28 @@ if isErrorPlot
     %t = text(h(end,end)/1.5,errorE(end,end)/14', 'Machine error');
     %t.FontSize = 14;
     %t.Color = colors(mod(p_xi-1,p_xi)+1,:);
-    
+
     
     xlabel('h', 'FontWeight','bold')
     ylabel('||u-u_h||_{E}', 'FontWeight','bold')
-    
+
     if strcmp(shape,'L-shape') || strcmp(shape,'L-shape2')
-        diff = 0.5;
-        close
-        factor12 = (errorE_mesh1(2,:)/h_mesh1(2,:).^(2))*diff;
-        factor22 = (errorE(2,2:end)/h(2,2:end).^(2))*diff;
-        %         factor23 = (errorE(2,2:end)/h(2,2:end).^(3))*diff;
-        %         factor13 = (errorE_mesh1(2,:)/h_mesh1(2,:).^(3))*diff;
+        close 
         figure(6)
         colors = get(gca, 'ColorOrder');
         loglog(h(2,:)',errorE(2,:)','linewidth',3, 'color',colors(2,:))
-        hold on;
-        loglog(h_mesh1(2,:)',errorE_mesh1(2,:)','linewidth',3, 'color',colors(1,:))
+        hold on
         grid on
         set(gca,'fontsize', 18);
-
-        loglog(h_mesh1(2,:)',factor12*(h_mesh1(2,:)'.^(2)),'--', 'color',colors(1,:))
-        t = text(h_mesh1(2,end)/1.5,factor12*h_mesh1(2,end)'.^(2),['h^', num2str(2)]);
-        t.FontSize = 16;
-        t.Color = colors(1,:);
-
         loglog(h(2,:)',factor22*(h(2,:)'.^(2)),'--', 'color',colors(2,:))
-        t = text(h(2,end)/1.5,factor22*h(2,end)'.^(2),['h^', num2str(2)]);
-        t.FontSize = 16;
-        t.Color = colors(2,:);
         
-        %legend('u_h, p=2', 'C_1h^2 (reference)')
-        legend('Mesh 1', 'Mesh 2')
+        legend('u_h, p=2', 'C_1h^2 (reference)')
         xlabel('h', 'FontWeight','bold')
-        ylabel('||u-u^h||_{E}', 'FontWeight','bold')
+        ylabel('||u-u_h||_{E}', 'FontWeight','bold')
     end
+    
+    % ylabel('Energy error norm:   ||u-u_h||_{E}')
+    % title('Energy error norm,   u = x^3')
+    %axis([max(min(min(h))-max(max(h))/2,0), max(max(max(h))+max(max(h))/2,0), max(min(min(errorE))-max(max(errorE))/2,0), max(max(max(errorE))+max(max(errorE))/2,0)])
 end
 
-toc

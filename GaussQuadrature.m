@@ -41,7 +41,7 @@ switch Nq
               (18+sqrt(30))/72;
               (18-sqrt(30))/72];
     otherwise
-        disp('Nq must be 1,2,3 or 4!')
+        [xq, w] = lgwt(Nq,0,1);
         return
 end
 % 
