@@ -48,8 +48,11 @@ bnd.top.value    = 'v';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 el_xi_start = 3; el_eta_start = 2;
-
+<<<<<<< HEAD
+nohr = 11;  % number of h-refinement
+=======
 nohr = 5;  % number of h-refinement
+>>>>>>> 6f84612018650aa8de2ccf0b2c22db9e898ae4f1
 
 %elementsStart = 2; elementsEnd = 10;
 p_xi_start = 1; p_eta_start = 1;

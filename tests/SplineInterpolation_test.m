@@ -2,8 +2,8 @@ close all; addpath ../; addpath ../Basis/; addpath ../HelpFunctions/
 a = -1; b = 1;
 el = 5; p = 3;
 
-func = @(x) (x).^3;
-%func = @(x) sin(x*2*pi);
+func = @(x) (x).^1;
+% func = @(x) sin(x*2*pi);
 
 x_para = linspace(0,1,100);
 x_phys = x_para*(b-a)+a;
@@ -21,14 +21,16 @@ d = N'\y_phys';
 figure(1)
 hold on 
 
-% The exact function
-plot(x_phys,func(x_phys),'--k')
-
 % The points 
-plot(greville_phys,d,'-*')
+plot(greville_phys,d,'-k*')
+
+% The exact function
+plot(x_phys,func(x_phys),'-b', 'linewidth',2)
+
+
 
 % The interpolated solution
-plot(x_phys,N'*d,'r-')
+plot(x_phys,N'*d,'r-',  'linewidth',2)
 % Verification
 norm(func(x_phys)'-N'*d)
 
