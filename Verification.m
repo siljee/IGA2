@@ -48,7 +48,7 @@ bnd.top.value    = 'v';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 el_xi_start = 3; el_eta_start = 2;
-nohr = 7;  % number of h-refinement
+nohr = 5;  % number of h-refinement
 
 %elementsStart = 2; elementsEnd = 10;
 p_xi_start = 1; p_eta_start = 1;
@@ -495,6 +495,8 @@ if isErrorPlot
         xlabel('h', 'FontWeight','bold')
         ylabel('||u-u_h||_{H^0}', 'FontWeight','bold')
     end
+    
+    saveas(gcf,['L-shapeH0', num2str(nohr),'.png'])
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       Energy error
