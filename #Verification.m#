@@ -48,7 +48,7 @@ bnd.top.value    = 'v';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 el_xi_start = 3; el_eta_start = 2;
-nohr = 11;  % number of h-refinement
+nohr = 8;  % number of h-refinement
 
 %elementsStart = 2; elementsEnd = 10;
 p_xi_start = 1; p_eta_start = 1;
@@ -267,7 +267,7 @@ end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % figure(1)
 % subplot(3,1,1)
-% surf(Px,Py,U_exact(Px,Py))% 'linestyle', 'none');  % Det kan være Py skal transponeres!
+% surf(Px,Py,U_exact(Px,Py))% 'linestyle', 'none');  % Det kan vÃ¦re Py skal transponeres!
 % title(['Exact.   p_\xi=', num2str(p_xi), ', p_\eta=', num2str(p_eta)])
 % hold on
 % %plot((N_knot_xi'*Px)', 'k-*')
@@ -433,7 +433,7 @@ if isErrorPlot
     set(gca,'fontsize', 16);
     colors = get(gca, 'ColorOrder');
     
-    leg = legend('u_h, p=1','u_h, p=2', 'u_h, p=3', 'C_1h^2 (reference)', 'C_2h^3 (reference)', 'C_3h^4 (reference)'); % 'u=C_3x³')
+    leg = legend('u_h, p=1','u_h, p=2', 'u_h, p=3', 'C_1h^2 (reference)', 'C_2h^3 (reference)', 'C_3h^4 (reference)'); % 'u=C_3xÂ³')
     set(leg,'FontSize',11);
     xlabel('h', 'FontWeight','bold')
     ylabel('||u-u_h||_{H^0}', 'FontWeight','bold')
@@ -496,8 +496,7 @@ if isErrorPlot
         ylabel('||u-u_h||_{H^0}', 'FontWeight','bold')
     end
 
-    saveas(gcf,['L-shapeH0', num2str(nohr),'.png'])
-    
+saveas(gcf,'L-shapeH08.png')    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %       Energy error
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -569,7 +568,6 @@ if isErrorPlot
         xlabel('h', 'FontWeight','bold')
         ylabel('||u-u^h||_{E}', 'FontWeight','bold')
     end
-    saveas(gcf,['L-shapeE', num2str(nohr),'.png'])
 end
 
 toc
