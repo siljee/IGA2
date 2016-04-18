@@ -1,7 +1,8 @@
 close all; addpath ../
 knotVector = [0,0,0,0,1,2,2,3,3,3,4,4,4,4];
 p = 3;
-x = linspace(0,4,1000);
+x = linspace(knotVector(1),knotVector(end),1000);
+fontsize = 14;
 
 % Constants
 WINDOW_WIDTH = 700;
@@ -21,11 +22,13 @@ fig10 = figure(10);
 subplot(4,1,1)
 hold on
 
-colors = get(gca, 'ColorOrder');
+ax = gca;
+colors = get(ax, 'ColorOrder');
+ax.FontSize = fontsize;  
 plot(x(1:125),N4(:,1:125), 'color', colors(1,:),'LineWidth', 2)
 for i = 0:2
     start = 125 + 250*i;
-    slutt = 125 + 250*(i+1)
+    slutt = 125 + 250*(i+1);
     plot(x(start:slutt),N4(:,start:slutt), 'color', colors(i+2,:), 'LineWidth', 2)
 end
 plot(x(slutt:slutt+125),N4(:,slutt:slutt+125), 'color', colors(5,:), 'LineWidth', 2)
@@ -36,33 +39,41 @@ hold on
 %plot(x, dN1, 'k')
 %plot(x, dN1([3,5,7,9,10],:), 'LineWidth', 2)
 
-colors = get(gca, 'ColorOrder');
+ax = gca;
+colors = get(ax, 'ColorOrder');
+ax.FontSize = fontsize;  
 plot(x(1:125),dN1(:,1:125), 'color', colors(1,:),'LineWidth', 2)
 for i = 0:2
     start = 125 + 250*i;
-    slutt = 125 + 250*(i+1)
+    slutt = 125 + 250*(i+1);
     plot(x(start:slutt),dN1(:,start:slutt), 'color', colors(i+2,:), 'LineWidth', 2)
 end
 plot(x(slutt:slutt+125),dN1(:,slutt:slutt+125), 'color', colors(5,:), 'LineWidth', 2)
-
+axis([0,4,-3,3])
 
 subplot(4,1,3)
 hold on
+ax = gca;
+colors = get(ax, 'ColorOrder');
+ax.FontSize = fontsize;  
 %plot(x,dN2, 'k')
 %plot(x,dN2([3,5,7,9,10],:), 'LineWidth', 2)
 plot(x(1:125),dN2(:,1:125), 'color', colors(1,:),'LineWidth', 2)
 for i = 0:2
     start = 125 + 250*i;
-    slutt = 125 + 250*(i+1)
+    slutt = 125 + 250*(i+1);
     plot(x(start:slutt),dN2(:,start:slutt), 'color', colors(i+2,:), 'LineWidth', 2)
 end
 plot(x(slutt:slutt+125),dN2(:,slutt:slutt+125), 'color', colors(5,:), 'LineWidth', 2)
-
+axis([0,4,-12,6])
 
 
 subplot(4,1,4)
 plot(x,dN3, 'k')
 hold on
+ax = gca;
+colors = get(ax, 'ColorOrder');
+ax.FontSize = fontsize;  
 %plot(x,dN3([3,5,7,9,10],:), 'LineWidth', 2)
 % subplot(5,1,5)
 % plot(x,dN4, 'k', 'LineWidth', 2)
@@ -70,13 +81,14 @@ hold on
 plot(x(1:125),dN3(:,1:125), 'color', colors(1,:),'LineWidth', 2)
 for i = 0:2
     start = 125 + 250*i;
-    slutt = 125 + 250*(i+1)
+    slutt = 125 + 250*(i+1);
     plot(x(start:slutt),dN3(:,start:slutt), 'color', colors(i+2,:), 'LineWidth', 2)
 end
 plot(x(slutt:slutt+125),dN3(:,slutt:slutt+125), 'color', colors(5,:), 'LineWidth', 2)
 
 
 fig10.Position = [1000,1000, WINDOW_WIDTH, WINDOW_HEIGHT];
+
 
 % 
 % fig1.Position = [1000 1000 WINDOW_WIDTH WINDOW_HEIGHT];          % Determines the size of the window
